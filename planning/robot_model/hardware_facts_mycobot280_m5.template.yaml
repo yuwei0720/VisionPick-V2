@@ -1,0 +1,50 @@
+schema_version: 1
+kind: visionpick_hardware_facts_review
+status: partially_confirmed
+manufacturer: Elephant Robotics
+exact_model: myCobot 280 M5
+generation: M5
+firmware:
+  system_version: null
+  basic_version: null
+pymycobot_version: null
+transport:
+  port: COM3
+  baud: 115200
+end_effector:
+  gripper_model: Elephant Robotics myCobot Adaptive Gripper
+  gripper_source: user_confirmed_official_accessory
+  vendor_overall_size_mm:
+  - 112.0
+  - 94.0
+  - 50.0
+  vendor_weight_g: 100.0
+  vendor_stroke_mm:
+  - 20.0
+  - 45.0
+  gripper_adapter: official LEGO-connector adapter; exact installed geometry pending
+    measurement
+  adapter_dimensions_mm: null
+camera:
+  realsense_model: null
+  mounting: external
+  location_description: fixed above the external worktable
+  approx_height_above_worktable_mm: 480.0
+  pose_in_robot_base_xyz_mm: null
+  pose_in_robot_base_rpy_deg: null
+  bracket_description: external workcell support; exact geometry pending measurement
+  robot_link_attachment: false
+robot_mounting:
+  description: null
+  base_plate_dimensions_mm: null
+verification:
+  joint_mapping: pending
+  frame_mapping: pending
+  collision_padding: pending
+  vendor_urdf_audit: pending
+notes:
+- Robot model and end-effector identity are user-confirmed.
+- RealSense is external and approximately 480 mm above the worktable; this approximate
+  height is not a calibrated planning-scene pose.
+- Fill remaining facts from read-only hardware capture plus physical inspection/measurement.
+- This file is a review worksheet and never authorizes motion by itself.

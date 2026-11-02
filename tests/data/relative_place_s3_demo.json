@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "source": "assistant_authored_synthetic_development_fixture",
+  "task": {
+    "intent": "place",
+    "target_object": "eraser",
+    "reference_object": "pen",
+    "spatial_relation": "right_of",
+    "needs_clarification": false
+  },
+  "frame": {
+    "width": 640,
+    "height": 480,
+    "depth_m": 0.5,
+    "intrinsics": {"fx": 600.0, "fy": 600.0, "ppx": 320.0, "ppy": 240.0}
+  },
+  "objects": [
+    {"class_name": "pen", "center_uv": [320.0, 240.0], "size_px": [120.0, 12.0], "angle_deg": 20.0, "confidence": 0.95},
+    {"class_name": "eraser", "center_uv": [450.0, 340.0], "size_px": [48.0, 30.0], "angle_deg": 0.0, "confidence": 0.95}
+  ],
+  "config": {
+    "model": {"confidence": 0.35},
+    "depth": {"min_m": 0.1, "max_m": 1.0, "min_valid_pixels": 20, "method": "median"},
+    "calibration": {"T_robot_from_camera": [[1,0,0,0],[0,-1,0,0],[0,0,-1,0.5],[0,0,0,1]]},
+    "orientation": {"axis_sample_half_length_px": 20, "gripper_yaw_offset_deg": 0, "reference_yaw_deg": 0},
+    "grasp": {
+      "workspace_mm": {"x": [-250,250], "y": [-190,190], "z": [-10,300]},
+      "rx_deg": -180, "ry_deg": 0, "approach_clearance_mm": 80, "lift_clearance_mm": 60,
+      "grasp_z_offset_mm": 10, "tcp_xy_offset_mm": [0,0]
+    },
+    "scene": {"workspace_view_rotation_deg": 90}
+  },
+  "surface": {
+    "static_scene": true,
+    "z_mm": 0,
+    "bounds_mm": {"x": [-250,250], "y": [-185,185]},
+    "error_margin_mm": 5,
+    "gripper_padding_mm": 10,
+    "surface_tolerance_mm": 2,
+    "release_tcp_z_offset_mm": 20,
+    "max_age_ms": 30000
+  },
+  "gap_interaction": {"timeout_ms": 10000, "default_gap_mm": 50},
+  "limitations": [
+    "All geometry and depth are synthetic; fixture millimetres are not device measurements.",
+    "No model API, physical camera, robot connection or motion is used."
+  ]
+}

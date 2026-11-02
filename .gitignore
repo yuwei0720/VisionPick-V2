@@ -1,0 +1,48 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv*/
+venv/
+env/
+
+# Credentials are supplied through the process environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+*api_key*.json
+*credentials*.json
+
+# Runtime data belongs to the workstation, not the source repository
+operator_data/
+runs/
+development_runs/
+acceptance_runs/
+backups/
+snapshots/
+_archive/
+_deprecated_v1/
+*.zip
+*.log
+*.tmp
+*.bak
+
+# Local tooling and browser dependencies
+node_modules/
+.codex/
+.agents/
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Reports from the source tree are generated locally
+baseline_*.log

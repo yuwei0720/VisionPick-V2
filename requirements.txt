@@ -1,0 +1,16 @@
+numpy>=1.26
+opencv-python>=4.8
+PyYAML>=6.0
+ultralytics>=8.3
+pyrealsense2>=2.55
+pymycobot>=3.6
+google-genai>=2.23.0
+pydantic>=2.6
+sounddevice>=0.5
+
+jsonschema>=4.0
+
+# B-layer script normalization; frozen semantic vocabulary is unchanged.
+opencc-python-reimplemented>=0.1.7
+
+pyserial>=3.5

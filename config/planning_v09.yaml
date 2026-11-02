@@ -1,0 +1,23 @@
+schema_version: 1
+planning:
+  enabled: false
+  mode: disabled
+  endpoint: http://127.0.0.1:8770
+  request_timeout_s: 2.0
+  max_state_age_ms: 1000
+  required_validation_level: 1
+  robot_model_manifest: planning/robot_model/robot_model_manifest.yaml
+  scene_manifest: planning/scene/scene_manifest.yaml
+  phase: 0.9_phase_0_2
+  note: Phase 0-2 only. Guard enforcement and MoveIt trajectory execution are not enabled.
+
+relative_placement:
+  near:
+    min_offset_mm: 30.0
+    max_offset_mm: 80.0
+    step_mm: 10.0
+    candidate_directions:
+      - left
+      - right
+      - above
+      - below

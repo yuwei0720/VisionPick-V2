@@ -1,0 +1,80 @@
+schema_version: 1
+kind: visionpick_vendor_robot_baseline
+baseline_id: elephantrobotics-mycobot-280-m5-humble
+status: candidate_vendor_baseline_not_hardware_verified
+manufacturer: Elephant Robotics
+exact_model: myCobot 280 M5
+generation: M5
+source:
+  repository: https://github.com/elephantrobotics/mycobot_ros2
+  branch: humble
+  description_package: mycobot_description
+  urdf_path: mycobot_description/urdf/mycobot_280_m5/mycobot_280_m5.urdf
+  web_reference: https://github.com/elephantrobotics/mycobot_ros2/blob/humble/mycobot_description/urdf/mycobot_280_m5/mycobot_280_m5.urdf
+robot:
+  urdf_robot_name: firefighter
+  base_link: g_base
+  tip_link: joint6_flange
+  expected_links:
+    - g_base
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+    - joint6_flange
+  arm_joint_names:
+    - joint2_to_joint1
+    - joint3_to_joint2
+    - joint4_to_joint3
+    - joint5_to_joint4
+    - joint6_to_joint5
+    - joint6output_to_joint6
+  joints:
+    joint2_to_joint1:
+      parent: joint1
+      child: joint2
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -2.9321
+      upper_rad: 2.9321
+    joint3_to_joint2:
+      parent: joint2
+      child: joint3
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -2.4434
+      upper_rad: 2.4434
+    joint4_to_joint3:
+      parent: joint3
+      child: joint4
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -2.6179
+      upper_rad: 2.6179
+    joint5_to_joint4:
+      parent: joint4
+      child: joint5
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -2.6179
+      upper_rad: 2.6179
+    joint6_to_joint5:
+      parent: joint5
+      child: joint6
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -2.7052
+      upper_rad: 2.7925
+    joint6output_to_joint6:
+      parent: joint6
+      child: joint6_flange
+      axis: [0.0, 0.0, 1.0]
+      lower_rad: -3.14159
+      upper_rad: 3.14159
+validation:
+  require_collision_geometry_on_links: true
+  require_mesh_files_present: true
+  joint_limit_tolerance_rad: 0.0001
+  axis_tolerance: 0.000001
+notes:
+  - This file records the public vendor baseline only; it is not a safety approval.
+  - The vendor URDF uses visual meshes as collision meshes for the arm body.
+  - The actual VisionPick gripper/adapter/camera-mount geometry must be added and hardware-verified before robot_model_manifest.yaml can become verified.
+  - Joint order is a candidate mapping to pymycobot get_angles()[0..5] and remains a hardware blocking test.

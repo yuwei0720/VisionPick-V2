@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "awaiting_hardware_ground_truth",
+  "robot_model_version": null,
+  "poses": [],
+  "ground_truth_methods_allowed": [
+    "measured_clearance",
+    "torque_released_static_positioning",
+    "known_safe_historical_configuration",
+    "known_problematic_historical_configuration",
+    "photo_or_video_evidence",
+    "low_speed_supervised_validation"
+  ],
+  "release_rule": "known collision regression set must have zero false negatives"
+}

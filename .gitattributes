@@ -1,0 +1,2 @@
+# Package manifests fingerprint bytes. Preserve existing LF/CRLF on every OS.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

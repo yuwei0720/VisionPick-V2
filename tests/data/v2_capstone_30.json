@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "name": "V2 大學專題實戰30題",
+  "default_station": "咖啡盒子",
+  "max_requests": 30,
+  "cases": [
+    {
+      "id": "CAP01",
+      "text": "把筆放到咖啡盒子",
+      "category": "direct_named",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP02",
+      "text": "把電池送到G",
+      "category": "station_alias",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "battery",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP03",
+      "text": "幫我拿橡皮擦",
+      "category": "omitted_destination",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP04",
+      "text": "給我螺絲起子",
+      "category": "colloquial_pick",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "screwdriver",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP05",
+      "text": "取修正帶放置在咖啡盒子",
+      "category": "colloquial_transfer",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "correction tape",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP06",
+      "text": "我需要擦掉鉛筆字",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP07",
+      "text": "幫我擦乾淨筆跡",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP08",
+      "text": "我需要擦掉錯字",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP09",
+      "text": "我要寫字",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP10",
+      "text": "我要在文件上簽名",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP11",
+      "text": "我想畫一條線",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP12",
+      "text": "紙箱上需要做記號",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "marker",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP13",
+      "text": "紙上的原子筆錯字要遮住",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "correction tape",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP14",
+      "text": "螺絲鬆了，我需要旋緊",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "screwdriver",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP15",
+      "text": "無線滑鼠沒電了，拿電源元件給我",
+      "category": "tool_special_use",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "battery",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP16",
+      "text": "把筆芯盒拿到咖啡盒子",
+      "category": "colloquial_transfer",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pencil lead case",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP17",
+      "text": "把橡皮擦移到筆的左邊",
+      "category": "relative",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "pen",
+            "relation": "left_of"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP18",
+      "text": "把電池搬到筆右側",
+      "category": "relative",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "battery",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "pen",
+            "relation": "right_of"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP19",
+      "text": "把橡皮擦移至電池前面近端",
+      "category": "relative",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "in_front_of"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP20",
+      "text": "把筆移動到电池後面遠端",
+      "category": "relative",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "behind"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP21",
+      "text": "把橡皮擦疊在電池上面",
+      "category": "rgbd_top",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "on_top_of"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP22",
+      "text": "把筆送到電池周圍，旁邊隨便一個空位就好",
+      "category": "rgbd_near",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "near"
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP23",
+      "text": "先把筆送到咖啡盒子，再把橡皮擦移到電池右邊，最後拿螺絲起子給我",
+      "category": "multi_3",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "right_of"
+          },
+          {
+            "target": "screwdriver",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP24",
+      "text": "先把修正帶送到咖啡盒子，再把橡皮擦放到筆左邊，接著取筆芯盒，最後把電池搬到咖啡盒子",
+      "category": "multi_4",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "correction tape",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "pen",
+            "relation": "left_of"
+          },
+          {
+            "target": "pencil lead case",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "battery",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP25",
+      "text": "先拿筆到咖啡盒子，再取橡皮擦放到電池右邊，接著送螺絲起子到咖啡盒子，然後給我麥克筆，最後移動筆芯盒到咖啡盒子",
+      "category": "multi_5",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "right_of"
+          },
+          {
+            "target": "screwdriver",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "marker",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          },
+          {
+            "target": "pencil lead case",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": true
+    },
+    {
+      "id": "CAP26",
+      "text": "幫我剪開這張紙，拿剪刀給我",
+      "category": "unregistered_object",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "scissors",
+            "destination_type": null,
+            "destination_name": null,
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": false
+    },
+    {
+      "id": "CAP27",
+      "text": "把水杯送到咖啡盒子",
+      "category": "unregistered_object",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "cup",
+            "destination_type": "named",
+            "destination_name": "咖啡盒子",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": false
+    },
+    {
+      "id": "CAP28",
+      "text": "把筆放到未登錄的火星基地站點",
+      "category": "unknown_station",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "pen",
+            "destination_type": "named",
+            "destination_name": "火星基地",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": false
+    },
+    {
+      "id": "CAP29",
+      "text": "把電池送到未登錄的秘密基地站點",
+      "category": "unknown_station",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "battery",
+            "destination_type": "named",
+            "destination_name": "秘密基地",
+            "reference": null,
+            "relation": null
+          }
+        ]
+      },
+      "expected_executable": false
+    },
+    {
+      "id": "CAP30",
+      "text": "把橡皮擦放在電池的「穿透內部 through」方向，不是附近或上面",
+      "category": "illegal_relation",
+      "expected_candidate": {
+        "tasks": [
+          {
+            "target": "eraser",
+            "destination_type": "relative",
+            "destination_name": null,
+            "reference": "battery",
+            "relation": "through"
+          }
+        ]
+      },
+      "expected_executable": false
+    }
+  ],
+  "evaluation": "25正題逐槽/順序比對；5負題整份不可就緒。模擬成績不是LLM語意正確率。",
+  "unsafe_release_definition": [
+    "unregistered_target_id",
+    "unknown_named_station",
+    "illegal_relation"
+  ]
+}

@@ -1,0 +1,65 @@
+schema_version: 1
+kind: visionpick_robot_model
+robot_model_version: visionpick-0.9-mycobot280-m5-adaptive-gripper-candidate-v3
+status: blocked_unverified_geometry_and_mapping
+verified: false
+hardware:
+  manufacturer: Elephant Robotics
+  family: MyCobot
+  exact_model: myCobot 280 M5
+  generation: M5
+  gripper: Elephant Robotics myCobot Adaptive Gripper
+  gripper_adapter: official LEGO-connector adapter; exact installed geometry pending
+    measurement
+  camera_mount: external_workcell_overhead_not_robot_mounted
+  robot_mounting: null
+  firmware: null
+  pymycobot_version: null
+moveit:
+  planning_group: arm
+  tip_link: joint6_flange
+  base_frame: g_base
+  joint_names:
+  - joint2_to_joint1
+  - joint3_to_joint2
+  - joint4_to_joint3
+  - joint5_to_joint4
+  - joint6_to_joint5
+  - joint6output_to_joint6
+  collision_padding_mm: {}
+artifacts: {}
+measurements:
+  report: null
+  verified_at: null
+  verified_by: null
+blocking_reasons:
+- Official adaptive-gripper URDF/xacro and meshes have not yet been snapshotted, hashed,
+  and compared with the installed gripper.
+- The installed gripper adapter/connector geometry has not been physically measured.
+- Joint order/sign/zero mapping between pymycobot and the vendor URDF has not passed
+  the hardware blocking test.
+- The vendor arm URDF/meshes have not yet been snapshotted, hashed, and reviewed on
+  the target ROS 2 host.
+- No hardware-verified SRDF self-collision matrix exists yet.
+- Collision padding has not been derived from physical measurements.
+notes:
+- Robot body identity is fixed to Elephant Robotics myCobot 280 M5.
+- End effector identity is fixed to the official Elephant Robotics myCobot Adaptive
+  Gripper.
+- RealSense is external to the robot and must not be attached as a robot link; it
+  belongs to the workcell/planning scene if its geometry is relevant.
+- The official ROS 2 Humble arm and adaptive-gripper descriptions are candidate baselines,
+  not safety approval.
+- Do not set verified=true merely because the vendor model loads in RViz.
+vendor_baseline:
+  baseline_file: vendor_baseline_mycobot_280_m5.yaml
+  source_repository: https://github.com/elephantrobotics/mycobot_ros2
+  source_branch: humble
+  source_urdf: mycobot_description/urdf/mycobot_280_m5/mycobot_280_m5.urdf
+  status: candidate_not_hardware_verified
+vendor_end_effector_baseline:
+  baseline_file: vendor_baseline_adaptive_gripper.yaml
+  source_repository: https://github.com/elephantrobotics/mycobot_ros2
+  source_branch: humble
+  model_graph: mycobot 280 m5 adaptive gripper
+  status: candidate_not_hardware_verified

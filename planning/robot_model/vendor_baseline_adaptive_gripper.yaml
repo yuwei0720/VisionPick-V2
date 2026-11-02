@@ -1,0 +1,34 @@
+schema_version: 1
+kind: visionpick_vendor_end_effector_baseline
+baseline_id: elephantrobotics-mycobot-adaptive-gripper-humble
+status: candidate_vendor_baseline_not_hardware_verified
+manufacturer: Elephant Robotics
+product_name: myCobot Adaptive Gripper
+applicable_robot: myCobot 280 M5
+source:
+  ros2_repository: https://github.com/elephantrobotics/mycobot_ros2
+  ros2_branch: humble
+  ros2_model_graph: mycobot 280 m5 adaptive gripper
+  product_reference: https://www.elephantrobotics.com/en/mycobot-accessories-grippers-en/
+vendor_facts:
+  overall_size_mm: [112.0, 94.0, 50.0]
+  weight_g: 100.0
+  stroke_mm: [20.0, 45.0]
+  positioning_precision_mm: 1.0
+  material: ABS plastic
+  connection: LEGO connector
+model_policy:
+  geometry_source: official ROS2 adaptive-gripper model plus hardware measurement
+  allow_vendor_overall_size_as_collision_geometry: false
+  require_open_state_collision_model: true
+  require_closed_state_collision_model: true
+  require_adapter_geometry_verification: true
+  require_critical_pair_review:
+    - gripper_to_wrist
+    - gripper_to_forearm
+    - gripper_to_upper_arm
+    - gripper_to_base
+notes:
+  - Vendor product dimensions are a sanity check only and are not sufficient to authorize collision checking.
+  - The official Humble repository advertises a myCobot 280 M5 adaptive-gripper model graph; the selected URDF/xacro and meshes must be snapshotted and hashed on the ROS host.
+  - The photographed/user-confirmed end effector is the official Elephant Robotics adaptive gripper supplied with the robot.

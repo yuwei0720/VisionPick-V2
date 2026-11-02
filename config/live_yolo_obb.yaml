@@ -1,0 +1,57 @@
+# V0 RealSense + YOLO11-OBB live inference configuration
+# All runtime-tunable parameters should be maintained here.
+
+camera:
+  width: 640
+  height: 480
+  fps: 30
+  warmup_frames: 30
+
+  # null = use the first available RealSense camera
+  # Or set a serial number, e.g. "126122270596"
+  device_serial: null
+
+depth:
+  enabled: true
+  align_to_color: true
+
+  # Robust depth inside a shrunken OBB polygon (meters).
+  min_m: 0.10
+  max_m: 1.50
+  roi_scale: 0.55
+  min_valid_pixels: 20
+  min_valid_ratio: 0.30
+  mad_multiplier: 3.5
+
+model:
+  path: models/best.pt
+  imgsz: 640
+  confidence: 0.25
+  iou: 0.70
+  max_det: 100
+
+  # auto = CUDA GPU if available, otherwise CPU
+  # You may also use 0, 1, "cpu", etc.
+  device: auto
+
+  verbose: false
+
+display:
+  window_name: "V0 - RealSense YOLO11-OBB"
+  show_fps: true
+  show_center: true
+  show_center_coordinate: true
+
+  # Show depth in meters at each detected OBB center.
+  # Legacy single-pixel check. Keep false for normal use.
+  show_center_depth: false
+
+  # Robust depth, Camera XYZ, image angle, and depth quality.
+  show_localization: true
+
+  center_radius: 5
+
+controls:
+  quit_keys:
+    - q
+    - esc

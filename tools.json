@@ -1,0 +1,237 @@
+{
+  "pen": {
+    "type": "tool",
+    "aliases": [
+      "筆",
+      "原子筆",
+      "簽字筆",
+      "圓珠筆",
+      "圆珠笔",
+      "原子笔",
+      "签字笔",
+      "ballpoint pen",
+      "pen"
+    ],
+    "description": "手持書寫工具，可用於寫字、簽名、畫線或做記號。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "capabilities": [
+      "write",
+      "sign",
+      "draw",
+      "mark"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "pen",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "screwdriver": {
+    "type": "tool",
+    "aliases": [
+      "螺絲起子",
+      "螺絲刀",
+      "起子",
+      "螺丝刀",
+      "螺丝起子",
+      "screwdriver"
+    ],
+    "description": "用於旋緊、旋鬆或固定螺絲的工具。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "capabilities": [
+      "tighten",
+      "loosen",
+      "fasten"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "screwdriver",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "battery": {
+    "type": "power_source",
+    "aliases": [
+      "電池",
+      "电池",
+      "battery"
+    ],
+    "description": "儲存並提供電力的電源元件。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "related_objects": [
+      "remote_car",
+      "robot",
+      "device",
+      "flashlight",
+      "toy_car",
+      "wireless_mouse",
+      "keyboard",
+      "phone"
+    ],
+    "capabilities": [
+      "power",
+      "energize",
+      "store_energy"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "battery",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "correction tape": {
+    "type": "tool",
+    "aliases": [
+      "修正帶",
+      "立可帶",
+      "塗改帶",
+      "修正带",
+      "涂改带",
+      "correction_tape",
+      "correction tape"
+    ],
+    "description": "用於遮住紙上原子筆或墨水字跡的修正帶；只提議拿取，不自動塗改。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "capabilities": [
+      "cover_written_mark"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "correction tape",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "eraser": {
+    "type": "tool",
+    "aliases": [
+      "橡皮擦",
+      "橡皮",
+      "擦子",
+      "橡皮檫",
+      "橡皮擦子",
+      "rubber eraser",
+      "eraser"
+    ],
+    "description": "用於擦除鉛筆字跡的文具。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "capabilities": [
+      "erase_pencil"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "eraser",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "marker": {
+    "type": "tool",
+    "aliases": [
+      "麥克筆",
+      "白板筆",
+      "奇異筆",
+      "記號筆",
+      "马克笔",
+      "白板笔",
+      "记号笔",
+      "marker"
+    ],
+    "description": "用於紙面或紙箱標記的麥克筆；泛指做記號時與筆皆為候選，不保證墨水可擦。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "capabilities": [
+      "mark",
+      "mark_surface"
+    ],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "marker",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  },
+  "pencil lead case": {
+    "type": "tool",
+    "aliases": [
+      "筆芯盒",
+      "鉛筆芯盒",
+      "自動鉛筆芯盒",
+      "笔芯盒",
+      "铅笔芯盒",
+      "pencil_lead_case",
+      "pencil lead case"
+    ],
+    "description": "裝鉛筆替換筆芯的盒子。 此用途僅供選擇工具；本系統僅夾取、搬運及放置，不執行工具的實際作業。",
+    "grounding_description": {
+      "head_entity": "box",
+      "contains_entity": "pencil_lead"
+    },
+    "capabilities": [],
+    "primitive_actions": [
+      "grasp",
+      "move",
+      "release"
+    ],
+    "graspable": true,
+    "detector_class": "pencil lead case",
+    "grasp_strategy": "top_down_obb",
+    "grasp_validated": false,
+    "role": "manipulable_tool",
+    "visual_locatable": true,
+    "capability_scope": "tool_selection_only",
+    "executable_actions": [
+      "pick_and_place"
+    ]
+  }
+}

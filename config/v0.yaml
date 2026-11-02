@@ -1,0 +1,239 @@
+project:
+  name: Edge AI 自然語言導引智慧機械臂抓取系統
+  version: V0-MVP
+camera:
+  device_id: null
+  width: 640
+  height: 480
+  fps: 30
+  warmup_frames: 15
+  frame_timeout_ms: 5000
+model:
+  weights: models/best.pt
+  imgsz: 640
+  confidence: 0.35
+  iou: 0.5
+  device: null
+target:
+  default_class: pen
+  aliases:
+    "修正帶": "correction tape"
+    "立可帶": "correction tape"
+    "塗改帶": "correction tape"
+    "修正带": "correction tape"
+    "涂改带": "correction tape"
+    "correction_tape": "correction tape"
+    "correction tape": "correction tape"
+    "橡皮擦": "eraser"
+    "橡皮": "eraser"
+    "擦子": "eraser"
+    "eraser": "eraser"
+    "麥克筆": "marker"
+    "白板筆": "marker"
+    "奇異筆": "marker"
+    "記號筆": "marker"
+    "马克笔": "marker"
+    "白板笔": "marker"
+    "记号笔": "marker"
+    "marker": "marker"
+    "筆芯盒": "pencil lead case"
+    "鉛筆芯盒": "pencil lead case"
+    "自動鉛筆芯盒": "pencil lead case"
+    "笔芯盒": "pencil lead case"
+    "铅笔芯盒": "pencil lead case"
+    "pencil_lead_case": "pencil lead case"
+    "pencil lead case": "pencil lead case"
+    筆: pen
+    鉛筆: pen
+    pen: pen
+    螺絲起子: screwdriver
+    螺絲刀: screwdriver
+    screw driver: screwdriver
+    screwdriver: screwdriver
+    電池: battery
+    battery: battery
+    原子筆: pen
+    簽字筆: pen
+    笔: pen
+    螺丝起子: screwdriver
+    螺丝刀: screwdriver
+    电池: battery
+    remote_car: remote_car
+    遙控車: remote_car
+    遙控汽車: remote_car
+    遥控车: remote_car
+    robot: robot
+    機器人: robot
+    机器人: robot
+    device: device
+    裝置: device
+    設備: device
+    设备: device
+    flashlight: flashlight
+    手電筒: flashlight
+    手电筒: flashlight
+    toy_car: toy_car
+    玩具車: toy_car
+    玩具车: toy_car
+    wireless_mouse: wireless_mouse
+    無線滑鼠: wireless_mouse
+    滑鼠: wireless_mouse
+    鼠标: wireless_mouse
+    keyboard: keyboard
+    鍵盤: keyboard
+    键盘: keyboard
+    phone: phone
+    手機: phone
+    電話: phone
+    手机: phone
+    table: table
+    桌子: table
+    桌面: table
+    桌上: table
+    desk: table
+    desktop: table
+    box: box
+    盒子: box
+    箱子: box
+    盒中: box
+    箱中: box
+    盒內: box
+    箱內: box
+    盒裡: box
+    箱裡: box
+    箱: box
+    screw: screw
+    螺絲: screw
+    螺丝: screw
+    paper: paper
+    紙張: paper
+    紙: paper
+    纸: paper
+    白纸: paper
+    白紙: paper
+    document: document
+    文件: document
+    文檔: document
+depth:
+  min_m: 0.1
+  max_m: 1.5
+  inner_obb_scale: 0.55
+  min_valid_pixels: 20
+  method: median
+  percentile: 35.0
+  fallback_roi_size: 11
+calibration:
+  ready_for_motion: true
+  rmse_mm: 7.465134535346532
+  max_rmse_mm: 15.0
+  T_robot_from_camera:
+  - - -0.9923005744839108
+    - -0.01087240665993836
+    - 0.12337487853011356
+    - 0.19768315367885783
+  - - -0.007498520426658479
+    - 0.9995859890804595
+    - 0.027778096145158693
+    - -0.006808262783118527
+  - - -0.12362581474073442
+    - 0.02663909171611584
+    - -0.9919712781740356
+    - 0.5434676759611373
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+orientation:
+  gripper_yaw_offset_deg: -45.0
+  axis_sample_half_length_px: 20.0
+  reference_yaw_deg: 0
+  place_orientation_policy_relative: "align_reference"
+  place_orientation_policy_self_relative: "keep_target"
+  place_orientation_policy_swap: "match_initial"
+  place_orientation_policy_named: "profile_pose"
+  fixed_place_yaw_deg: -45
+grasp:
+  approach_clearance_mm: 80.0
+  lift_clearance_mm: 60.0
+  grasp_z_offset_mm: 1
+  target_z_offsets_mm: {}
+  min_grasp_z_mm: null
+  tcp_xy_offset_mm: [-6, -6]
+  rx_deg: -175
+  ry_deg: -5
+  workspace_mm:
+    x:
+    - -280.0
+    - 280.0
+    y:
+    - -280.0
+    - 280.0
+    z:
+    - 70.0
+    - 320.0
+robot:
+  port: COM3
+  baud: 115200
+  coordinate_speed: 30
+  place_joint_speed: 30
+  coordinate_mode: 0
+  pregrasp_coordinate_mode: 0
+  approach_coordinate_mode: 0
+  lift_coordinate_mode: 0
+  coarse_step_mm: 25.0
+  vertical_motion_mode: "segmented_mode0"
+  vertical_segment_step_mm: 35
+  motion_timeout_s: 25
+  motion_poll_interval_s: 0.5
+  pose_verify_position_tolerance_mm: 20.0
+  pose_verify_orientation_tolerance_deg: 8.0
+  pose_verify_stable_polls: 1
+  fallback_wait_s: 3
+  vertical_endpoint_wait_s: 4.0    # 垂直終點等待 (抓取下降/抬升/放置下降/退避到位)
+  transfer_wait_s: 3.0             # 跨區等待 (長距離關節或座標跨區移動)
+  intermediate_wait_s: 0.35        # 垂直中間插補點間隔等待
+  start_settle_s: 1.5              # 回到 START 後的靜置穩定時間 (秒)，避免太快拍照拍到尚未完全到位的機械臂
+  move_to_start_before_pick: true
+  start_angles_deg:
+  - 0.0
+  - 0.0
+  - 0.0
+  - -90.0
+  - 0.0
+  - -45.0
+  start_angle_speed: 20
+  gripper:
+    speed: 80
+    open_speed: 50
+    close_speed: 80
+    open_state: 0
+    close_state: 1
+    wait_s: 3
+    open_wait_s: 1.2
+    close_wait_s: 1.8
+runtime:
+  debug_image: runs/v0_debug.png
+scene:
+  workspace_view_rotation_deg: 90
+  relation_margin_fraction: 0.03
+  near_max_fraction: 0.25
+  legacy_surface_fallback: true
+  sequence_gap_mm: 50
+voice:
+  backend: gemini_live
+  fallback_backend: none
+  live_model: gemini-3.5-transcribe-live
+  file_model: gemini-3.5-transcribe
+  record_seconds: 10.0
+  sample_rate_hz: 16000
+  channels: 1
+  live_chunk_ms: 100
+  live_final_timeout_s: 10.0
+  live_mode: VERBATIM
+  language_codes: []
+  custom_vocabulary:
+  - RealSense
+  - YOLO
+  - MyCobot
+  - 機械臂
+  - 螺絲起子

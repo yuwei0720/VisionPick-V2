@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "TaskItem": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "displacement_mm": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "destination_type": {
+                "const": "self_relative"
+              }
+            },
+            "required": [
+              "destination_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reference": {
+                "type": "null"
+              },
+              "destination_name": {
+                "type": "null"
+              },
+              "gap_mm": {
+                "type": "null"
+              },
+              "relation": {
+                "enum": [
+                  "left_of",
+                  "right_of",
+                  "in_front_of",
+                  "behind",
+                  null
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "Core 5-slot task representation.\n\nEvery task represents a single atomic pick -> move -> place action.",
+      "properties": {
+        "target": {
+          "description": "抓取目標之 canonical entity ID（如 pen、battery），不可為空白。",
+          "minLength": 1,
+          "pattern": "^(?!\\s*[uU][nN][kK][nN][oO][wW][nN]\\s*$)[\\s\\S]*\\S[\\s\\S]*$",
+          "title": "Target",
+          "type": "string"
+        },
+        "destination_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "named",
+                "relative",
+                "self_relative"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "目的地類型：named（具名站點）、relative（另一實例）、self_relative（當步抓取前自身中心位移）；未指定為 null。",
+          "title": "Destination Type"
+        },
+        "destination_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "已啟用的具名站點名稱（如 Station A、咖啡盒子）；若非具名站點則為 null。",
+          "title": "Destination Name"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "另一可視覺定位實例之 entity ID（如 battery、pen）；自身位移與非相對關係必須為 null。",
+          "title": "Reference"
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "enum": [
+                "left_of",
+                "right_of",
+                "in_front_of",
+                "behind",
+                "above",
+                "below",
+                "near",
+                "inside",
+                "on_top_of",
+                "at_initial"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "相對於參照物的空間幾何關係（如 left_of、above）；若非相對關係則為 null。",
+          "title": "Relation"
+        },
+        "gap_mm": {
+          "anyOf": [
+            {
+              "maximum": 120.0,
+              "minimum": 25.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "桌面相對放置的物品邊緣間距（mm），25 至 120；null 採系統預設。",
+          "title": "Gap Mm"
+        },
+        "displacement_mm": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "自身中心平移距離（mm），有限正數；僅 self_relative 使用，null 須追問。以各步抓取前當幀為基準，方向依工作台顯示平面。",
+          "title": "Displacement Mm"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "TaskItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Unified task plan container for both single-step and multi-step executions.",
+  "properties": {
+    "tasks": {
+      "description": "依原指令順序執行的任務清單；支援 1 至 20 步，20 為安全上限。",
+      "items": {
+        "$ref": "#/$defs/TaskItem"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "tasks"
+  ],
+  "title": "TaskPlanV2",
+  "type": "object",
+  "x-schema-version": "3.0.0",
+  "x-self-relative-anchor": "step_pre_pick",
+  "x-coordinate-frame": "display_workbench_plane",
+  "x-max-tasks": 20,
+  "x-core-slots": [
+    "target",
+    "destination_type",
+    "destination_name",
+    "reference",
+    "relation"
+  ]
+}

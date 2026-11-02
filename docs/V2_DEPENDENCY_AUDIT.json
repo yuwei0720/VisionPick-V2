@@ -1,0 +1,4202 @@
+{
+  "source_module_count": 58,
+  "source_import_count": 442,
+  "test_python_file_count": 13,
+  "config_files": [
+    "config/live_yolo_obb.yaml",
+    "config/planning_v09.yaml",
+    "config/v0.yaml"
+  ],
+  "production_reachable_count": 42,
+  "production_reachable": [
+    "integration",
+    "integration.relative_placement",
+    "integration.scene_grounding",
+    "object_catalog",
+    "operator_console",
+    "operator_console.arrival_settings_v2",
+    "operator_console.artifacts",
+    "operator_console.assets",
+    "operator_console.cli",
+    "operator_console.direct_control_v2",
+    "operator_console.engineering_v2",
+    "operator_console.events",
+    "operator_console.hybrid_transfer",
+    "operator_console.lease",
+    "operator_console.performance",
+    "operator_console.place_capture",
+    "operator_console.place_catalog_v2",
+    "operator_console.place_profiles",
+    "operator_console.preferred_ik",
+    "operator_console.robot_adapter",
+    "operator_console.runtime_v2",
+    "operator_console.serial_tools",
+    "operator_console.server",
+    "operator_console.service_v2",
+    "operator_console.simulation",
+    "operator_console.table_surface",
+    "operator_console.task_parser_v2",
+    "operator_console.task_pending_v2",
+    "operator_console.task_schema_v2",
+    "operator_console.task_sequence_v2",
+    "v0_mvp",
+    "v0_mvp.camera",
+    "v0_mvp.detector",
+    "v0_mvp.geometry",
+    "v0_mvp.grasp",
+    "v0_mvp.motion_safety",
+    "v0_mvp.robot",
+    "v0_mvp.types",
+    "voice_input",
+    "voice_input.gemini_live_transcriber",
+    "voice_input.gemini_transcriber",
+    "voice_input.voice_input"
+  ],
+  "forbidden_v1_import_count": 0,
+  "forbidden_v1_imports": [],
+  "dependency_graph": {
+    "integration": [],
+    "integration.relative_placement": [
+      "integration",
+      "integration.scene_grounding",
+      "object_catalog",
+      "v0_mvp.geometry",
+      "v0_mvp.grasp"
+    ],
+    "integration.scene_grounding": [
+      "integration"
+    ],
+    "object_catalog": [],
+    "operator_console": [],
+    "operator_console.arrival_settings_v2": [
+      "operator_console",
+      "operator_console.direct_control_v2",
+      "operator_console.events"
+    ],
+    "operator_console.artifacts": [
+      "integration.scene_grounding",
+      "operator_console",
+      "operator_console.events"
+    ],
+    "operator_console.assets": [
+      "operator_console",
+      "operator_console.events"
+    ],
+    "operator_console.calibration_manager": [
+      "operator_console",
+      "operator_console.events",
+      "v0_mvp.calibration"
+    ],
+    "operator_console.cli": [
+      "operator_console",
+      "operator_console.server",
+      "operator_console.service_v2"
+    ],
+    "operator_console.direct_control_v2": [
+      "operator_console",
+      "operator_console.robot_adapter",
+      "v0_mvp.robot"
+    ],
+    "operator_console.doctor": [
+      "operator_console",
+      "operator_console.events",
+      "v0_mvp.motion_safety"
+    ],
+    "operator_console.engineering_v2": [
+      "operator_console",
+      "operator_console.direct_control_v2",
+      "operator_console.events",
+      "operator_console.lease",
+      "operator_console.runtime_v2"
+    ],
+    "operator_console.events": [
+      "operator_console",
+      "operator_console.artifacts",
+      "operator_console.performance"
+    ],
+    "operator_console.hybrid_transfer": [
+      "operator_console",
+      "v0_mvp.robot"
+    ],
+    "operator_console.lease": [
+      "operator_console"
+    ],
+    "operator_console.performance": [
+      "operator_console"
+    ],
+    "operator_console.place_capture": [
+      "operator_console",
+      "v0_mvp.camera",
+      "v0_mvp.geometry"
+    ],
+    "operator_console.place_catalog_v2": [
+      "operator_console",
+      "operator_console.direct_control_v2"
+    ],
+    "operator_console.place_profiles": [
+      "operator_console",
+      "operator_console.events"
+    ],
+    "operator_console.planning_status": [
+      "operator_console"
+    ],
+    "operator_console.preferred_ik": [
+      "operator_console"
+    ],
+    "operator_console.robot_adapter": [
+      "operator_console",
+      "operator_console.hybrid_transfer",
+      "operator_console.preferred_ik",
+      "v0_mvp.robot"
+    ],
+    "operator_console.runtime_v2": [
+      "integration.relative_placement",
+      "integration.scene_grounding",
+      "object_catalog",
+      "operator_console",
+      "operator_console.arrival_settings_v2",
+      "operator_console.direct_control_v2",
+      "operator_console.engineering_v2",
+      "operator_console.events",
+      "operator_console.lease",
+      "operator_console.place_catalog_v2",
+      "operator_console.simulation",
+      "operator_console.task_parser_v2",
+      "operator_console.task_pending_v2",
+      "operator_console.task_sequence_v2",
+      "v0_mvp.camera",
+      "v0_mvp.detector",
+      "v0_mvp.geometry",
+      "v0_mvp.grasp",
+      "v0_mvp.motion_safety",
+      "v0_mvp.types",
+      "voice_input.gemini_live_transcriber",
+      "voice_input.gemini_transcriber",
+      "voice_input.voice_input"
+    ],
+    "operator_console.serial_tools": [
+      "operator_console"
+    ],
+    "operator_console.server": [
+      "operator_console",
+      "operator_console.events",
+      "operator_console.runtime_v2"
+    ],
+    "operator_console.service_v2": [
+      "operator_console",
+      "operator_console.assets",
+      "operator_console.place_capture",
+      "operator_console.place_profiles",
+      "operator_console.serial_tools",
+      "operator_console.table_surface"
+    ],
+    "operator_console.simulation": [
+      "operator_console",
+      "v0_mvp.geometry",
+      "v0_mvp.types"
+    ],
+    "operator_console.table_surface": [
+      "operator_console",
+      "operator_console.events"
+    ],
+    "operator_console.task_parser_v2": [
+      "operator_console",
+      "operator_console.task_schema_v2"
+    ],
+    "operator_console.task_pending_v2": [
+      "operator_console",
+      "operator_console.task_parser_v2",
+      "operator_console.task_schema_v2"
+    ],
+    "operator_console.task_schema_v2": [
+      "operator_console"
+    ],
+    "operator_console.task_sequence_v2": [
+      "operator_console"
+    ],
+    "planning": [
+      "planning.client",
+      "planning.contracts",
+      "planning.errors"
+    ],
+    "planning.client": [
+      "planning",
+      "planning.contracts",
+      "planning.errors"
+    ],
+    "planning.contracts": [
+      "planning",
+      "planning.errors"
+    ],
+    "planning.errors": [
+      "planning"
+    ],
+    "planning.hardware_facts": [
+      "planning"
+    ],
+    "planning.model_manifest": [
+      "planning",
+      "planning.errors"
+    ],
+    "planning.state": [
+      "planning",
+      "planning.contracts",
+      "planning.errors"
+    ],
+    "planning.validator": [
+      "planning",
+      "planning.contracts",
+      "planning.errors"
+    ],
+    "planning.vendor_model": [
+      "planning"
+    ],
+    "v0_mvp": [],
+    "v0_mvp.calibration": [
+      "v0_mvp",
+      "v0_mvp.geometry"
+    ],
+    "v0_mvp.calibration_reference": [
+      "v0_mvp"
+    ],
+    "v0_mvp.camera": [
+      "v0_mvp",
+      "v0_mvp.types"
+    ],
+    "v0_mvp.config": [
+      "v0_mvp"
+    ],
+    "v0_mvp.core": [
+      "v0_mvp",
+      "v0_mvp.geometry",
+      "v0_mvp.grasp"
+    ],
+    "v0_mvp.detector": [
+      "v0_mvp",
+      "v0_mvp.geometry",
+      "v0_mvp.types"
+    ],
+    "v0_mvp.geometry": [
+      "v0_mvp",
+      "v0_mvp.types"
+    ],
+    "v0_mvp.grasp": [
+      "v0_mvp",
+      "v0_mvp.types"
+    ],
+    "v0_mvp.motion_safety": [
+      "v0_mvp",
+      "v0_mvp.geometry"
+    ],
+    "v0_mvp.robot": [
+      "v0_mvp"
+    ],
+    "v0_mvp.types": [
+      "v0_mvp"
+    ],
+    "voice_input": [
+      "voice_input.voice_input"
+    ],
+    "voice_input.gemini_live_transcriber": [
+      "voice_input"
+    ],
+    "voice_input.gemini_transcriber": [
+      "voice_input"
+    ],
+    "voice_input.voice_input": [
+      "voice_input",
+      "voice_input.gemini_live_transcriber",
+      "voice_input.gemini_transcriber"
+    ]
+  },
+  "source_imports": [
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 4,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 5,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 6,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 7,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 9,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 10,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 11,
+      "statement": "from object_catalog import graspable_classes",
+      "targets": [
+        "object_catalog",
+        "object_catalog.graspable_classes"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 13,
+      "statement": "from .scene_grounding import SceneGroundingError, normalize_rotation_deg",
+      "targets": [
+        "integration.scene_grounding",
+        "integration.scene_grounding.SceneGroundingError",
+        "integration.scene_grounding.normalize_rotation_deg"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 14,
+      "statement": "from v0_mvp.geometry import as_transform, camera_axis_to_robot_yaw_deg, robust_depth_from_obb",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform",
+        "v0_mvp.geometry.camera_axis_to_robot_yaw_deg",
+        "v0_mvp.geometry.robust_depth_from_obb"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 15,
+      "statement": "from v0_mvp.grasp import build_top_down_plan",
+      "targets": [
+        "v0_mvp.grasp",
+        "v0_mvp.grasp.build_top_down_plan"
+      ]
+    },
+    {
+      "file": "src/integration/relative_placement.py",
+      "line": 78,
+      "statement": "from v0_mvp.geometry import choose_equivalent_yaw_deg",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.choose_equivalent_yaw_deg"
+      ]
+    },
+    {
+      "file": "src/integration/scene_grounding.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/integration/scene_grounding.py",
+      "line": 3,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/integration/scene_grounding.py",
+      "line": 4,
+      "statement": "from math import hypot",
+      "targets": [
+        "math",
+        "math.hypot"
+      ]
+    },
+    {
+      "file": "src/integration/scene_grounding.py",
+      "line": 5,
+      "statement": "from typing import Any, Iterable",
+      "targets": [
+        "typing",
+        "typing.Any",
+        "typing.Iterable"
+      ]
+    },
+    {
+      "file": "src/object_catalog.py",
+      "line": 6,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/object_catalog.py",
+      "line": 7,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 4,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 5,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 6,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 7,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 8,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 10,
+      "statement": "from .direct_control_v2 import ArrivalSettings",
+      "targets": [
+        "operator_console.direct_control_v2",
+        "operator_console.direct_control_v2.ArrivalSettings"
+      ]
+    },
+    {
+      "file": "src/operator_console/arrival_settings_v2.py",
+      "line": 11,
+      "statement": "from .events import atomic_json",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 1,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 2,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 3,
+      "statement": "import zipfile",
+      "targets": [
+        "zipfile"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 5,
+      "statement": "from .events import redact, sha256, utc_now",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.redact",
+        "operator_console.events.sha256",
+        "operator_console.events.utc_now"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 25,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 26,
+      "statement": "from integration.scene_grounding import normalize_rotation_deg",
+      "targets": [
+        "integration.scene_grounding",
+        "integration.scene_grounding.normalize_rotation_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 39,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 65,
+      "statement": "import re",
+      "targets": [
+        "re"
+      ]
+    },
+    {
+      "file": "src/operator_console/artifacts.py",
+      "line": 112,
+      "statement": "import io",
+      "targets": [
+        "io"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 9,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 10,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 11,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 12,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 13,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 14,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 15,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 17,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/assets.py",
+      "line": 19,
+      "statement": "from .events import atomic_json, sha256",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json",
+        "operator_console.events.sha256"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 9,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 10,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 11,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 12,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 13,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 15,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 16,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 18,
+      "statement": "from .events import atomic_json, sha256",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json",
+        "operator_console.events.sha256"
+      ]
+    },
+    {
+      "file": "src/operator_console/calibration_manager.py",
+      "line": 19,
+      "statement": "from v0_mvp.calibration import CalibrationError, load_point_csv, solve_rigid_transform",
+      "targets": [
+        "v0_mvp.calibration",
+        "v0_mvp.calibration.CalibrationError",
+        "v0_mvp.calibration.load_point_csv",
+        "v0_mvp.calibration.solve_rigid_transform"
+      ]
+    },
+    {
+      "file": "src/operator_console/cli.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/cli.py",
+      "line": 4,
+      "statement": "import argparse",
+      "targets": [
+        "argparse"
+      ]
+    },
+    {
+      "file": "src/operator_console/cli.py",
+      "line": 5,
+      "statement": "from .service_v2 import ConsoleServiceV2",
+      "targets": [
+        "operator_console.service_v2",
+        "operator_console.service_v2.ConsoleServiceV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/cli.py",
+      "line": 6,
+      "statement": "from .server import serve",
+      "targets": [
+        "operator_console.server",
+        "operator_console.server.serve"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 9,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 11,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 12,
+      "statement": "from dataclasses import asdict, dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.asdict",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 13,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 14,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 16,
+      "statement": "from v0_mvp.robot import MyCobotController, RobotError, vertical_motion_settings",
+      "targets": [
+        "v0_mvp.robot",
+        "v0_mvp.robot.MyCobotController",
+        "v0_mvp.robot.RobotError",
+        "v0_mvp.robot.vertical_motion_settings"
+      ]
+    },
+    {
+      "file": "src/operator_console/direct_control_v2.py",
+      "line": 17,
+      "statement": "from .robot_adapter import OperatorRobotController, dispatch_result_failed",
+      "targets": [
+        "operator_console.robot_adapter",
+        "operator_console.robot_adapter.OperatorRobotController",
+        "operator_console.robot_adapter.dispatch_result_failed"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 3,
+      "statement": "from importlib import metadata, util",
+      "targets": [
+        "importlib",
+        "importlib.metadata",
+        "importlib.util"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 4,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 5,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 6,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 7,
+      "statement": "import platform",
+      "targets": [
+        "platform"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 8,
+      "statement": "import subprocess",
+      "targets": [
+        "subprocess"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 9,
+      "statement": "import sys",
+      "targets": [
+        "sys"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 11,
+      "statement": "from .events import sha256",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.sha256"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 30,
+      "statement": "from v0_mvp.motion_safety import validate_motion_unlock",
+      "targets": [
+        "v0_mvp.motion_safety",
+        "v0_mvp.motion_safety.validate_motion_unlock"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 153,
+      "statement": "import tempfile",
+      "targets": [
+        "tempfile"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 126,
+      "statement": "from serial.tools.list_ports import comports",
+      "targets": [
+        "serial.tools.list_ports",
+        "serial.tools.list_ports.comports"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 119,
+      "statement": "import pyrealsense2 as rs",
+      "targets": [
+        "pyrealsense2"
+      ]
+    },
+    {
+      "file": "src/operator_console/doctor.py",
+      "line": 142,
+      "statement": "import sounddevice as sd",
+      "targets": [
+        "sounddevice"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 4,
+      "statement": "from contextlib import contextmanager",
+      "targets": [
+        "contextlib",
+        "contextlib.contextmanager"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 5,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 6,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 7,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 8,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 9,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 10,
+      "statement": "import re",
+      "targets": [
+        "re"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 11,
+      "statement": "import tempfile",
+      "targets": [
+        "tempfile"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 12,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 14,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 16,
+      "statement": "from .direct_control_v2 import ArrivalSettings, DirectRobotControllerV2, _six",
+      "targets": [
+        "operator_console.direct_control_v2",
+        "operator_console.direct_control_v2.ArrivalSettings",
+        "operator_console.direct_control_v2.DirectRobotControllerV2",
+        "operator_console.direct_control_v2._six"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 17,
+      "statement": "from .events import atomic_json, redact, utc_now",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json",
+        "operator_console.events.redact",
+        "operator_console.events.utc_now"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 18,
+      "statement": "from .lease import RobotLease",
+      "targets": [
+        "operator_console.lease",
+        "operator_console.lease.RobotLease"
+      ]
+    },
+    {
+      "file": "src/operator_console/engineering_v2.py",
+      "line": 289,
+      "statement": "from .runtime_v2 import _identity",
+      "targets": [
+        "operator_console.runtime_v2",
+        "operator_console.runtime_v2._identity"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 4,
+      "statement": "from collections import deque",
+      "targets": [
+        "collections",
+        "collections.deque"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 5,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 6,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 7,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 8,
+      "statement": "import dataclasses",
+      "targets": [
+        "dataclasses"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 9,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 10,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 11,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 12,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 13,
+      "statement": "import queue",
+      "targets": [
+        "queue"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 14,
+      "statement": "import re",
+      "targets": [
+        "re"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 15,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 16,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 17,
+      "statement": "import traceback",
+      "targets": [
+        "traceback"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 18,
+      "statement": "import uuid",
+      "targets": [
+        "uuid"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 100,
+      "statement": "from .performance import PerformanceTracker",
+      "targets": [
+        "operator_console.performance",
+        "operator_console.performance.PerformanceTracker"
+      ]
+    },
+    {
+      "file": "src/operator_console/events.py",
+      "line": 178,
+      "statement": "from .artifacts import intermediate_outputs",
+      "targets": [
+        "operator_console.artifacts",
+        "operator_console.artifacts.intermediate_outputs"
+      ]
+    },
+    {
+      "file": "src/operator_console/hybrid_transfer.py",
+      "line": 2,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/hybrid_transfer.py",
+      "line": 4,
+      "statement": "from v0_mvp.robot import RobotError",
+      "targets": [
+        "v0_mvp.robot",
+        "v0_mvp.robot.RobotError"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 2,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 3,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 4,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 5,
+      "statement": "import tempfile",
+      "targets": [
+        "tempfile"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 18,
+      "statement": "import msvcrt",
+      "targets": [
+        "msvcrt"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 24,
+      "statement": "import fcntl",
+      "targets": [
+        "fcntl"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 34,
+      "statement": "import msvcrt",
+      "targets": [
+        "msvcrt"
+      ]
+    },
+    {
+      "file": "src/operator_console/lease.py",
+      "line": 37,
+      "statement": "import fcntl",
+      "targets": [
+        "fcntl"
+      ]
+    },
+    {
+      "file": "src/operator_console/performance.py",
+      "line": 6,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/performance.py",
+      "line": 8,
+      "statement": "from collections import defaultdict, deque",
+      "targets": [
+        "collections",
+        "collections.defaultdict",
+        "collections.deque"
+      ]
+    },
+    {
+      "file": "src/operator_console/performance.py",
+      "line": 9,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/performance.py",
+      "line": 10,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 9,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 11,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 12,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 13,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 14,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 15,
+      "statement": "import secrets",
+      "targets": [
+        "secrets"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 17,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 18,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 19,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 21,
+      "statement": "from v0_mvp.camera import RealSenseCamera, _import_rs",
+      "targets": [
+        "v0_mvp.camera",
+        "v0_mvp.camera.RealSenseCamera",
+        "v0_mvp.camera._import_rs"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 22,
+      "statement": "from v0_mvp.geometry import as_transform, transform_point",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform",
+        "v0_mvp.geometry.transform_point"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_capture.py",
+      "line": 72,
+      "statement": "import re",
+      "targets": [
+        "re"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 4,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 5,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 6,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 7,
+      "statement": "from types import SimpleNamespace",
+      "targets": [
+        "types",
+        "types.SimpleNamespace"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 8,
+      "statement": "import unicodedata",
+      "targets": [
+        "unicodedata"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_catalog_v2.py",
+      "line": 10,
+      "statement": "from .direct_control_v2 import _six",
+      "targets": [
+        "operator_console.direct_control_v2",
+        "operator_console.direct_control_v2._six"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 8,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 10,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 11,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 12,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 13,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 14,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 15,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 16,
+      "statement": "import re",
+      "targets": [
+        "re"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 17,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 19,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/place_profiles.py",
+      "line": 21,
+      "statement": "from .events import atomic_json",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json"
+      ]
+    },
+    {
+      "file": "src/operator_console/planning_status.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/planning_status.py",
+      "line": 9,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/planning_status.py",
+      "line": 10,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/planning_status.py",
+      "line": 11,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/preferred_ik.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/preferred_ik.py",
+      "line": 9,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 9,
+      "statement": "import logging",
+      "targets": [
+        "logging"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 10,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 11,
+      "statement": "from numbers import Real",
+      "targets": [
+        "numbers",
+        "numbers.Real"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 12,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 14,
+      "statement": "from v0_mvp.robot import MyCobotController, RobotError, build_vertical_waypoints, vertical_motion_settings",
+      "targets": [
+        "v0_mvp.robot",
+        "v0_mvp.robot.MyCobotController",
+        "v0_mvp.robot.RobotError",
+        "v0_mvp.robot.build_vertical_waypoints",
+        "v0_mvp.robot.vertical_motion_settings"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 15,
+      "statement": "from .preferred_ik import deduplicate_candidates, score_candidate",
+      "targets": [
+        "operator_console.preferred_ik",
+        "operator_console.preferred_ik.deduplicate_candidates",
+        "operator_console.preferred_ik.score_candidate"
+      ]
+    },
+    {
+      "file": "src/operator_console/robot_adapter.py",
+      "line": 16,
+      "statement": "from .hybrid_transfer import move_hybrid_transfer",
+      "targets": [
+        "operator_console.hybrid_transfer",
+        "operator_console.hybrid_transfer.move_hybrid_transfer"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 6,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 8,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 9,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 10,
+      "statement": "from types import SimpleNamespace",
+      "targets": [
+        "types",
+        "types.SimpleNamespace"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 11,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 12,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 13,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 14,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 15,
+      "statement": "import uuid",
+      "targets": [
+        "uuid"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 17,
+      "statement": "from .arrival_settings_v2 import ArrivalSettingsStoreV2",
+      "targets": [
+        "operator_console.arrival_settings_v2",
+        "operator_console.arrival_settings_v2.ArrivalSettingsStoreV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 18,
+      "statement": "from .direct_control_v2 import DirectRobotControllerV2, _six",
+      "targets": [
+        "operator_console.direct_control_v2",
+        "operator_console.direct_control_v2.DirectRobotControllerV2",
+        "operator_console.direct_control_v2._six"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 19,
+      "statement": "from .events import atomic_json, redact",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json",
+        "operator_console.events.redact"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 20,
+      "statement": "from .lease import RobotLease",
+      "targets": [
+        "operator_console.lease",
+        "operator_console.lease.RobotLease"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 21,
+      "statement": "from .place_catalog_v2 import PlaceCatalogV2",
+      "targets": [
+        "operator_console.place_catalog_v2",
+        "operator_console.place_catalog_v2.PlaceCatalogV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 22,
+      "statement": "from .task_parser_v2 import parse_task_plan_v2, validate_task_plan_v2_candidate",
+      "targets": [
+        "operator_console.task_parser_v2",
+        "operator_console.task_parser_v2.parse_task_plan_v2",
+        "operator_console.task_parser_v2.validate_task_plan_v2_candidate"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 23,
+      "statement": "from .task_pending_v2 import PendingTaskPlanV2",
+      "targets": [
+        "operator_console.task_pending_v2",
+        "operator_console.task_pending_v2.PendingTaskPlanV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 24,
+      "statement": "from .task_sequence_v2 import ObservationV2, TaskSequenceV2",
+      "targets": [
+        "operator_console.task_sequence_v2",
+        "operator_console.task_sequence_v2.ObservationV2",
+        "operator_console.task_sequence_v2.TaskSequenceV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 32,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 37,
+      "statement": "from integration.scene_grounding import normalize_rotation_deg",
+      "targets": [
+        "integration.scene_grounding",
+        "integration.scene_grounding.normalize_rotation_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 64,
+      "statement": "from .engineering_v2 import EngineeringConsoleV2",
+      "targets": [
+        "operator_console.engineering_v2",
+        "operator_console.engineering_v2.EngineeringConsoleV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 91,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 124,
+      "statement": "from voice_input.voice_input import build_custom_vocabulary",
+      "targets": [
+        "voice_input.voice_input",
+        "voice_input.voice_input.build_custom_vocabulary"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 135,
+      "statement": "import sounddevice as sd",
+      "targets": [
+        "sounddevice"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 136,
+      "statement": "import wave",
+      "targets": [
+        "wave"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 137,
+      "statement": "import io",
+      "targets": [
+        "io"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 159,
+      "statement": "import tempfile",
+      "targets": [
+        "tempfile"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 160,
+      "statement": "from voice_input.gemini_transcriber import transcribe_audio_file",
+      "targets": [
+        "voice_input.gemini_transcriber",
+        "voice_input.gemini_transcriber.transcribe_audio_file"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 170,
+      "statement": "from voice_input.gemini_live_transcriber import transcribe_pcm_live",
+      "targets": [
+        "voice_input.gemini_live_transcriber",
+        "voice_input.gemini_live_transcriber.transcribe_pcm_live"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 171,
+      "statement": "import queue",
+      "targets": [
+        "queue"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 221,
+      "statement": "import base64",
+      "targets": [
+        "base64"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 222,
+      "statement": "import queue",
+      "targets": [
+        "queue"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 463,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 587,
+      "statement": "from object_catalog import class_display_name, graspable_classes",
+      "targets": [
+        "object_catalog",
+        "object_catalog.class_display_name",
+        "object_catalog.graspable_classes"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 946,
+      "statement": "from v0_mvp.motion_safety import validate_motion_unlock",
+      "targets": [
+        "v0_mvp.motion_safety",
+        "v0_mvp.motion_safety.validate_motion_unlock"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1068,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1069,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1119,
+      "statement": "from integration.relative_placement import _footprint, footprint_yaw_deg",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement._footprint",
+        "integration.relative_placement.footprint_yaw_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1120,
+      "statement": "from v0_mvp.geometry import as_transform",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1121,
+      "statement": "from v0_mvp.grasp import build_top_down_plan",
+      "targets": [
+        "v0_mvp.grasp",
+        "v0_mvp.grasp.build_top_down_plan"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1122,
+      "statement": "from object_catalog import graspable_classes",
+      "targets": [
+        "object_catalog",
+        "object_catalog.graspable_classes"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1277,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1278,
+      "statement": "from dataclasses import replace",
+      "targets": [
+        "dataclasses",
+        "dataclasses.replace"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1279,
+      "statement": "from integration.relative_placement import (_footprint,footprint_yaw_deg,\n            placement_preview_geometry,project_robot_points_mm)",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement._footprint",
+        "integration.relative_placement.footprint_yaw_deg",
+        "integration.relative_placement.placement_preview_geometry",
+        "integration.relative_placement.project_robot_points_mm"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1281,
+      "statement": "from v0_mvp.geometry import as_transform",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1399,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1400,
+      "statement": "from integration.relative_placement import (_footprint, footprint_yaw_deg,\n            clearance_envelope_obb, resolve_place_orientation)",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement._footprint",
+        "integration.relative_placement.footprint_yaw_deg",
+        "integration.relative_placement.clearance_envelope_obb",
+        "integration.relative_placement.resolve_place_orientation"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1402,
+      "statement": "from v0_mvp.geometry import as_transform",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1468,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1469,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1470,
+      "statement": "from integration.relative_placement import (_footprint, plan_relative_place,\n            clearance_envelope_obb, convex_polygons_intersect, _surface_clear)",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement._footprint",
+        "integration.relative_placement.plan_relative_place",
+        "integration.relative_placement.clearance_envelope_obb",
+        "integration.relative_placement.convex_polygons_intersect",
+        "integration.relative_placement._surface_clear"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1472,
+      "statement": "from v0_mvp.geometry import as_transform, camera_axis_to_robot_yaw_deg",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform",
+        "v0_mvp.geometry.camera_axis_to_robot_yaw_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1473,
+      "statement": "from v0_mvp.grasp import build_top_down_plan",
+      "targets": [
+        "v0_mvp.grasp",
+        "v0_mvp.grasp.build_top_down_plan"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1474,
+      "statement": "from v0_mvp.types import GraspPlan",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.GraspPlan"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 193,
+      "statement": "import sounddevice as sd",
+      "targets": [
+        "sounddevice"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 358,
+      "statement": "from v0_mvp.motion_safety import validate_motion_unlock",
+      "targets": [
+        "v0_mvp.motion_safety",
+        "v0_mvp.motion_safety.validate_motion_unlock"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1529,
+      "statement": "from integration.relative_placement import resolve_place_orientation",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement.resolve_place_orientation"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1555,
+      "statement": "from integration.scene_grounding import SceneGroundingError",
+      "targets": [
+        "integration.scene_grounding",
+        "integration.scene_grounding.SceneGroundingError"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 783,
+      "statement": "from google import genai",
+      "targets": [
+        "google",
+        "google.genai"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 784,
+      "statement": "from google.genai import types",
+      "targets": [
+        "google.genai",
+        "google.genai.types"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 785,
+      "statement": "from google.genai._gaos.utils.retries import RetryConfig",
+      "targets": [
+        "google.genai._gaos.utils.retries",
+        "google.genai._gaos.utils.retries.RetryConfig"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 786,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1075,
+      "statement": "from .simulation import synthetic_scene",
+      "targets": [
+        "operator_console.simulation",
+        "operator_console.simulation.synthetic_scene"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1080,
+      "statement": "from v0_mvp.camera import RealSenseCamera",
+      "targets": [
+        "v0_mvp.camera",
+        "v0_mvp.camera.RealSenseCamera"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1081,
+      "statement": "from v0_mvp.detector import YOLO11OBBDetector",
+      "targets": [
+        "v0_mvp.detector",
+        "v0_mvp.detector.YOLO11OBBDetector"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1525,
+      "statement": "from integration.relative_placement import footprint_yaw_deg",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement.footprint_yaw_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1036,
+      "statement": "from .simulation import FakeMyCobot",
+      "targets": [
+        "operator_console.simulation",
+        "operator_console.simulation.FakeMyCobot"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 855,
+      "statement": "from integration.relative_placement import resolve_place_orientation",
+      "targets": [
+        "integration.relative_placement",
+        "integration.relative_placement.resolve_place_orientation"
+      ]
+    },
+    {
+      "file": "src/operator_console/runtime_v2.py",
+      "line": 1348,
+      "statement": "from v0_mvp.grasp import build_top_down_plan",
+      "targets": [
+        "v0_mvp.grasp",
+        "v0_mvp.grasp.build_top_down_plan"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 8,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 10,
+      "statement": "from dataclasses import dataclass, asdict",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass",
+        "dataclasses.asdict"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 11,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 12,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 13,
+      "statement": "import zlib",
+      "targets": [
+        "zlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 22,
+      "statement": "import serial",
+      "targets": [
+        "serial"
+      ]
+    },
+    {
+      "file": "src/operator_console/serial_tools.py",
+      "line": 23,
+      "statement": "from serial.tools.list_ports import comports",
+      "targets": [
+        "serial.tools.list_ports",
+        "serial.tools.list_ports.comports"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 4,
+      "statement": "from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer",
+      "targets": [
+        "http.server",
+        "http.server.BaseHTTPRequestHandler",
+        "http.server.ThreadingHTTPServer"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 5,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 6,
+      "statement": "from urllib.parse import urlsplit, unquote",
+      "targets": [
+        "urllib.parse",
+        "urllib.parse.urlsplit",
+        "urllib.parse.unquote"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 7,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 8,
+      "statement": "import mimetypes",
+      "targets": [
+        "mimetypes"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 9,
+      "statement": "import secrets",
+      "targets": [
+        "secrets"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 10,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 11,
+      "statement": "import webbrowser",
+      "targets": [
+        "webbrowser"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 12,
+      "statement": "import base64",
+      "targets": [
+        "base64"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 13,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 14,
+      "statement": "from time import monotonic",
+      "targets": [
+        "time",
+        "time.monotonic"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 16,
+      "statement": "from .events import redact",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.redact"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 17,
+      "statement": "from . import VERSION",
+      "targets": [
+        "operator_console",
+        "operator_console.VERSION"
+      ]
+    },
+    {
+      "file": "src/operator_console/server.py",
+      "line": 26,
+      "statement": "from .runtime_v2 import ConsoleRuntimeV2",
+      "targets": [
+        "operator_console.runtime_v2",
+        "operator_console.runtime_v2.ConsoleRuntimeV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 2,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 3,
+      "statement": "import os",
+      "targets": [
+        "os"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 4,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 6,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 8,
+      "statement": "from .assets import AssetRegistry",
+      "targets": [
+        "operator_console.assets",
+        "operator_console.assets.AssetRegistry"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 9,
+      "statement": "from .place_profiles import PlaceProfileManager",
+      "targets": [
+        "operator_console.place_profiles",
+        "operator_console.place_profiles.PlaceProfileManager"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 10,
+      "statement": "from .place_capture import VisualPlaceCaptureManager",
+      "targets": [
+        "operator_console.place_capture",
+        "operator_console.place_capture.VisualPlaceCaptureManager"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 11,
+      "statement": "from .table_surface import TableSurfaceManager",
+      "targets": [
+        "operator_console.table_surface",
+        "operator_console.table_surface.TableSurfaceManager"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 12,
+      "statement": "from .serial_tools import enumerate_ports",
+      "targets": [
+        "operator_console.serial_tools",
+        "operator_console.serial_tools.enumerate_ports"
+      ]
+    },
+    {
+      "file": "src/operator_console/service_v2.py",
+      "line": 44,
+      "statement": "import pyrealsense2 as rs",
+      "targets": [
+        "pyrealsense2"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 4,
+      "statement": "from types import SimpleNamespace",
+      "targets": [
+        "types",
+        "types.SimpleNamespace"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 5,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 6,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 8,
+      "statement": "from v0_mvp.types import FrameBundle, OBBDetection",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.FrameBundle",
+        "v0_mvp.types.OBBDetection"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 13,
+      "statement": "from v0_mvp.geometry import long_axis_angle_deg",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.long_axis_angle_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 172,
+      "statement": "from v0_mvp.geometry import long_axis_angle_deg",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.long_axis_angle_deg"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 179,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/simulation.py",
+      "line": 180,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 4,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 5,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 6,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 7,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/table_surface.py",
+      "line": 9,
+      "statement": "from .events import atomic_json, utc_now",
+      "targets": [
+        "operator_console.events",
+        "operator_console.events.atomic_json",
+        "operator_console.events.utc_now"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 12,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 14,
+      "statement": "from collections.abc import Mapping",
+      "targets": [
+        "collections.abc",
+        "collections.abc.Mapping"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 15,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 16,
+      "statement": "from dataclasses import dataclass, replace",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass",
+        "dataclasses.replace"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 17,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 18,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 19,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 20,
+      "statement": "from typing import Any",
+      "targets": [
+        "typing",
+        "typing.Any"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 22,
+      "statement": "from jsonschema import Draft202012Validator",
+      "targets": [
+        "jsonschema",
+        "jsonschema.Draft202012Validator"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 24,
+      "statement": "from .task_schema_v2 import MAX_TASKS, SELF_RELATIONS, TaskPlanV2",
+      "targets": [
+        "operator_console.task_schema_v2",
+        "operator_console.task_schema_v2.MAX_TASKS",
+        "operator_console.task_schema_v2.SELF_RELATIONS",
+        "operator_console.task_schema_v2.TaskPlanV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 152,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_parser_v2.py",
+      "line": 346,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 4,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 5,
+      "statement": "from dataclasses import replace",
+      "targets": [
+        "dataclasses",
+        "dataclasses.replace"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 6,
+      "statement": "import hashlib",
+      "targets": [
+        "hashlib"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 7,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 8,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 9,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 10,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 11,
+      "statement": "import unicodedata",
+      "targets": [
+        "unicodedata"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 13,
+      "statement": "from .task_parser_v2 import CORE_SLOTS, _context, _validate",
+      "targets": [
+        "operator_console.task_parser_v2",
+        "operator_console.task_parser_v2.CORE_SLOTS",
+        "operator_console.task_parser_v2._context",
+        "operator_console.task_parser_v2._validate"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_pending_v2.py",
+      "line": 14,
+      "statement": "from .task_schema_v2 import SELF_RELATIONS, TaskPlanV2",
+      "targets": [
+        "operator_console.task_schema_v2",
+        "operator_console.task_schema_v2.SELF_RELATIONS",
+        "operator_console.task_schema_v2.TaskPlanV2"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_schema_v2.py",
+      "line": 2,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_schema_v2.py",
+      "line": 4,
+      "statement": "from typing import Literal",
+      "targets": [
+        "typing",
+        "typing.Literal"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_schema_v2.py",
+      "line": 5,
+      "statement": "from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator",
+      "targets": [
+        "pydantic",
+        "pydantic.BaseModel",
+        "pydantic.ConfigDict",
+        "pydantic.Field",
+        "pydantic.field_validator",
+        "pydantic.model_validator"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 7,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 9,
+      "statement": "from copy import deepcopy",
+      "targets": [
+        "copy",
+        "copy.deepcopy"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 10,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 11,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 12,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 13,
+      "statement": "import threading",
+      "targets": [
+        "threading"
+      ]
+    },
+    {
+      "file": "src/operator_console/task_sequence_v2.py",
+      "line": 14,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/planning/__init__.py",
+      "line": 7,
+      "statement": "from .contracts import (\n    SCHEMA_VERSION,\n    AssuranceLevel,\n    CollisionContact,\n    JointStateSnapshot,\n    PayloadSpec,\n    TargetPose,\n    ValidationRequest,\n    ValidationResponse,\n)",
+      "targets": [
+        "planning.contracts",
+        "planning.contracts.SCHEMA_VERSION",
+        "planning.contracts.AssuranceLevel",
+        "planning.contracts.CollisionContact",
+        "planning.contracts.JointStateSnapshot",
+        "planning.contracts.PayloadSpec",
+        "planning.contracts.TargetPose",
+        "planning.contracts.ValidationRequest",
+        "planning.contracts.ValidationResponse"
+      ]
+    },
+    {
+      "file": "src/planning/__init__.py",
+      "line": 17,
+      "statement": "from .client import DisabledPlanningClient, HttpPlanningClient, PlanningClient",
+      "targets": [
+        "planning.client",
+        "planning.client.DisabledPlanningClient",
+        "planning.client.HttpPlanningClient",
+        "planning.client.PlanningClient"
+      ]
+    },
+    {
+      "file": "src/planning/__init__.py",
+      "line": 18,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 3,
+      "statement": "from abc import ABC, abstractmethod",
+      "targets": [
+        "abc",
+        "abc.ABC",
+        "abc.abstractmethod"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 4,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 5,
+      "statement": "from urllib.error import HTTPError, URLError",
+      "targets": [
+        "urllib.error",
+        "urllib.error.HTTPError",
+        "urllib.error.URLError"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 6,
+      "statement": "from urllib.request import Request, urlopen",
+      "targets": [
+        "urllib.request",
+        "urllib.request.Request",
+        "urllib.request.urlopen"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 8,
+      "statement": "from .contracts import ValidationRequest, ValidationResponse",
+      "targets": [
+        "planning.contracts",
+        "planning.contracts.ValidationRequest",
+        "planning.contracts.ValidationResponse"
+      ]
+    },
+    {
+      "file": "src/planning/client.py",
+      "line": 9,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 3,
+      "statement": "from dataclasses import dataclass, field",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass",
+        "dataclasses.field"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 4,
+      "statement": "from enum import IntEnum",
+      "targets": [
+        "enum",
+        "enum.IntEnum"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 5,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 6,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 7,
+      "statement": "import uuid",
+      "targets": [
+        "uuid"
+      ]
+    },
+    {
+      "file": "src/planning/contracts.py",
+      "line": 9,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/errors.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/errors.py",
+      "line": 3,
+      "statement": "from enum import Enum",
+      "targets": [
+        "enum",
+        "enum.Enum"
+      ]
+    },
+    {
+      "file": "src/planning/hardware_facts.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/hardware_facts.py",
+      "line": 3,
+      "statement": "from datetime import datetime, timezone",
+      "targets": [
+        "datetime",
+        "datetime.datetime",
+        "datetime.timezone"
+      ]
+    },
+    {
+      "file": "src/planning/hardware_facts.py",
+      "line": 4,
+      "statement": "from importlib import metadata",
+      "targets": [
+        "importlib",
+        "importlib.metadata"
+      ]
+    },
+    {
+      "file": "src/planning/hardware_facts.py",
+      "line": 5,
+      "statement": "from typing import Any",
+      "targets": [
+        "typing",
+        "typing.Any"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 3,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 4,
+      "statement": "from hashlib import sha256",
+      "targets": [
+        "hashlib",
+        "hashlib.sha256"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 5,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 6,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 7,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 8,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/planning/model_manifest.py",
+      "line": 10,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/state.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/state.py",
+      "line": 3,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/planning/state.py",
+      "line": 4,
+      "statement": "from .contracts import JointStateSnapshot",
+      "targets": [
+        "planning.contracts",
+        "planning.contracts.JointStateSnapshot"
+      ]
+    },
+    {
+      "file": "src/planning/state.py",
+      "line": 5,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 3,
+      "statement": "from dataclasses import dataclass, field",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass",
+        "dataclasses.field"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 4,
+      "statement": "from typing import Protocol",
+      "targets": [
+        "typing",
+        "typing.Protocol"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 5,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 7,
+      "statement": "from .contracts import AssuranceLevel, CollisionContact, ValidationRequest, ValidationResponse",
+      "targets": [
+        "planning.contracts",
+        "planning.contracts.AssuranceLevel",
+        "planning.contracts.CollisionContact",
+        "planning.contracts.ValidationRequest",
+        "planning.contracts.ValidationResponse"
+      ]
+    },
+    {
+      "file": "src/planning/validator.py",
+      "line": 8,
+      "statement": "from .errors import PlanningError, PlanningStatus",
+      "targets": [
+        "planning.errors",
+        "planning.errors.PlanningError",
+        "planning.errors.PlanningStatus"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 3,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 4,
+      "statement": "from hashlib import sha256",
+      "targets": [
+        "hashlib",
+        "hashlib.sha256"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 5,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 6,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 7,
+      "statement": "import shutil",
+      "targets": [
+        "shutil"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 8,
+      "statement": "import xml.etree.ElementTree as ET",
+      "targets": [
+        "xml.etree.ElementTree"
+      ]
+    },
+    {
+      "file": "src/planning/vendor_model.py",
+      "line": 10,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration.py",
+      "line": 2,
+      "statement": "import csv",
+      "targets": [
+        "csv"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration.py",
+      "line": 3,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration.py",
+      "line": 4,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration.py",
+      "line": 5,
+      "statement": "from .geometry import as_transform",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration_reference.py",
+      "line": 6,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration_reference.py",
+      "line": 7,
+      "statement": "import json",
+      "targets": [
+        "json"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration_reference.py",
+      "line": 8,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/calibration_reference.py",
+      "line": 9,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 2,
+      "statement": "import logging",
+      "targets": [
+        "logging"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 3,
+      "statement": "from typing import Any",
+      "targets": [
+        "typing",
+        "typing.Any"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 4,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 5,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 6,
+      "statement": "from .types import FrameBundle",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.FrameBundle"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/camera.py",
+      "line": 17,
+      "statement": "import pyrealsense2 as rs",
+      "targets": [
+        "pyrealsense2"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/config.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/config.py",
+      "line": 2,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/config.py",
+      "line": 3,
+      "statement": "import yaml",
+      "targets": [
+        "yaml"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/core.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/core.py",
+      "line": 2,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/core.py",
+      "line": 3,
+      "statement": "from .geometry import robust_depth_from_obb, transform_point, camera_axis_to_robot_yaw_deg",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.robust_depth_from_obb",
+        "v0_mvp.geometry.transform_point",
+        "v0_mvp.geometry.camera_axis_to_robot_yaw_deg"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/core.py",
+      "line": 4,
+      "statement": "from .grasp import build_top_down_plan",
+      "targets": [
+        "v0_mvp.grasp",
+        "v0_mvp.grasp.build_top_down_plan"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/core.py",
+      "line": 5,
+      "statement": "import logging",
+      "targets": [
+        "logging"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 2,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 3,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 4,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 5,
+      "statement": "from .geometry import long_axis_angle_deg, obb_center",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.long_axis_angle_deg",
+        "v0_mvp.geometry.obb_center"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 6,
+      "statement": "from .types import OBBDetection",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.OBBDetection"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/detector.py",
+      "line": 50,
+      "statement": "from ultralytics import YOLO",
+      "targets": [
+        "ultralytics",
+        "ultralytics.YOLO"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/geometry.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/geometry.py",
+      "line": 2,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/geometry.py",
+      "line": 3,
+      "statement": "import cv2",
+      "targets": [
+        "cv2"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/geometry.py",
+      "line": 4,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/geometry.py",
+      "line": 5,
+      "statement": "from .types import DepthEstimate",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.DepthEstimate"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/grasp.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/grasp.py",
+      "line": 2,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/grasp.py",
+      "line": 3,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/grasp.py",
+      "line": 4,
+      "statement": "from .types import GraspPlan",
+      "targets": [
+        "v0_mvp.types",
+        "v0_mvp.types.GraspPlan"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/motion_safety.py",
+      "line": 2,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/motion_safety.py",
+      "line": 3,
+      "statement": "from .geometry import as_transform",
+      "targets": [
+        "v0_mvp.geometry",
+        "v0_mvp.geometry.as_transform"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/robot.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/robot.py",
+      "line": 2,
+      "statement": "import logging",
+      "targets": [
+        "logging"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/robot.py",
+      "line": 3,
+      "statement": "import math",
+      "targets": [
+        "math"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/robot.py",
+      "line": 4,
+      "statement": "import time",
+      "targets": [
+        "time"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/robot.py",
+      "line": 43,
+      "statement": "from pymycobot.mycobot import MyCobot",
+      "targets": [
+        "pymycobot.mycobot",
+        "pymycobot.mycobot.MyCobot"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/types.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/types.py",
+      "line": 2,
+      "statement": "from dataclasses import dataclass",
+      "targets": [
+        "dataclasses",
+        "dataclasses.dataclass"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/types.py",
+      "line": 3,
+      "statement": "from typing import Any",
+      "targets": [
+        "typing",
+        "typing.Any"
+      ]
+    },
+    {
+      "file": "src/v0_mvp/types.py",
+      "line": 4,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/voice_input/__init__.py",
+      "line": 3,
+      "statement": "from .voice_input import capture_and_transcribe",
+      "targets": [
+        "voice_input.voice_input",
+        "voice_input.voice_input.capture_and_transcribe"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 3,
+      "statement": "import asyncio",
+      "targets": [
+        "asyncio"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 4,
+      "statement": "import contextlib",
+      "targets": [
+        "contextlib"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 5,
+      "statement": "from typing import Any, Callable, Iterable",
+      "targets": [
+        "typing",
+        "typing.Any",
+        "typing.Callable",
+        "typing.Iterable"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 311,
+      "statement": "from google import genai",
+      "targets": [
+        "google",
+        "google.genai"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 91,
+      "statement": "from google import genai",
+      "targets": [
+        "google",
+        "google.genai"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 92,
+      "statement": "from google.genai import types",
+      "targets": [
+        "google.genai",
+        "google.genai.types"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_live_transcriber.py",
+      "line": 104,
+      "statement": "import sounddevice as sd",
+      "targets": [
+        "sounddevice"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_transcriber.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_transcriber.py",
+      "line": 3,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_transcriber.py",
+      "line": 4,
+      "statement": "from typing import Any, Iterable",
+      "targets": [
+        "typing",
+        "typing.Any",
+        "typing.Iterable"
+      ]
+    },
+    {
+      "file": "src/voice_input/gemini_transcriber.py",
+      "line": 28,
+      "statement": "from google import genai",
+      "targets": [
+        "google",
+        "google.genai"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 1,
+      "statement": "from __future__ import annotations",
+      "targets": [
+        "__future__",
+        "__future__.annotations"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 3,
+      "statement": "import logging",
+      "targets": [
+        "logging"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 4,
+      "statement": "import tempfile",
+      "targets": [
+        "tempfile"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 5,
+      "statement": "import wave",
+      "targets": [
+        "wave"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 6,
+      "statement": "from pathlib import Path",
+      "targets": [
+        "pathlib",
+        "pathlib.Path"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 7,
+      "statement": "from typing import Any, Callable",
+      "targets": [
+        "typing",
+        "typing.Any",
+        "typing.Callable"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 9,
+      "statement": "import numpy as np",
+      "targets": [
+        "numpy"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 11,
+      "statement": "from .gemini_live_transcriber import LiveTranscriptionError, transcribe_microphone_live",
+      "targets": [
+        "voice_input.gemini_live_transcriber",
+        "voice_input.gemini_live_transcriber.LiveTranscriptionError",
+        "voice_input.gemini_live_transcriber.transcribe_microphone_live"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 12,
+      "statement": "from .gemini_transcriber import transcribe_audio_file",
+      "targets": [
+        "voice_input.gemini_transcriber",
+        "voice_input.gemini_transcriber.transcribe_audio_file"
+      ]
+    },
+    {
+      "file": "src/voice_input/voice_input.py",
+      "line": 224,
+      "statement": "import sounddevice as sd",
+      "targets": [
+        "sounddevice"
+      ]
+    }
+  ],
+  "limits": "AST import inventory, including function-local imports; not a hardware/call/data-flow proof."
+}

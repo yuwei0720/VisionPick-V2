@@ -1,0 +1,535 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "VALID",
+        "PLANNER_UNAVAILABLE",
+        "STATE_UNAVAILABLE",
+        "STATE_STALE",
+        "STATE_CHANGED_SINCE_VALIDATION",
+        "INVALID_ROBOT_STATE",
+        "ROBOT_MODEL_UNVERIFIED",
+        "ROBOT_MODEL_MISMATCH",
+        "SCENE_UNVERIFIED",
+        "SCENE_VERSION_MISMATCH",
+        "FRAME_MISMATCH",
+        "JOINT_MAPPING_INVALID",
+        "NO_IK",
+        "JOINT_LIMIT_VIOLATION",
+        "GOAL_SELF_COLLISION",
+        "GOAL_ENV_COLLISION",
+        "PAYLOAD_GEOMETRY_UNAVAILABLE",
+        "PAYLOAD_COLLISION",
+        "ATTACHED_OBJECT_COLLISION",
+        "PAYLOAD_STATE_MISMATCH",
+        "COMMAND_PATH_COLLISION",
+        "COMMAND_PATH_UNVERIFIABLE",
+        "VALIDATION_LEVEL_INSUFFICIENT",
+        "PROTOCOL_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "message": {
+      "type": "string"
+    },
+    "validation_level_requested": {
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "validation_level_achieved": {
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "state_used": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JointStateSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state_age_ms": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "robot_model_version_used": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "robot_model_hash_used": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "scene_version_used": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "scene_hash_used": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ik_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "found": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "joint_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "positions_rad": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "search_exhaustive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "found",
+        "joint_names",
+        "positions_rad",
+        "search_exhaustive"
+      ]
+    },
+    "collision_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collision": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collision_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CollisionContact"
+          }
+        }
+      },
+      "required": [
+        "collision",
+        "collision_type",
+        "contacts"
+      ]
+    },
+    "payload_collision": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "diagnostics": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "status",
+    "valid",
+    "message",
+    "validation_level_requested",
+    "validation_level_achieved",
+    "state_used",
+    "state_age_ms",
+    "robot_model_version_used",
+    "robot_model_hash_used",
+    "scene_version_used",
+    "scene_hash_used",
+    "ik_result",
+    "collision_result",
+    "payload_collision",
+    "diagnostics"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "VALID"
+          },
+          "validation_level_achieved": {
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ik_result": {
+            "properties": {
+              "found": {
+                "const": true
+              }
+            }
+          },
+          "collision_result": {
+            "properties": {
+              "collision": {
+                "const": false
+              }
+            }
+          },
+          "payload_collision": {
+            "enum": [
+              false,
+              null
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VisionPick planning validation response v1",
+  "$defs": {
+    "JointStateSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "positions": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "units": {
+          "enum": [
+            "deg",
+            "rad"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at_unix_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "names",
+        "positions",
+        "units",
+        "source",
+        "captured_at_unix_ms",
+        "sequence"
+      ]
+    },
+    "TargetPose": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "xyz_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "rpy_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame_id",
+        "xyz_mm",
+        "rpy_deg",
+        "label"
+      ]
+    },
+    "PayloadSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "NONE",
+            "ATTACHED"
+          ]
+        },
+        "object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dimensions_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "attach_link": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "touch_links": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pose_xyz_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "pose_rpy_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "state",
+        "object_id",
+        "shape",
+        "dimensions_mm",
+        "attach_link",
+        "touch_links",
+        "pose_xyz_mm",
+        "pose_rpy_deg"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "ATTACHED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "shape": {
+                "const": "box"
+              },
+              "object_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "attach_link": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimensions_mm": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "touch_links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CollisionContact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body_1": {
+          "type": "string"
+        },
+        "body_2": {
+          "type": "string"
+        },
+        "body_type_1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "body_type_2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "depth_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "body_1",
+        "body_2",
+        "body_type_1",
+        "body_type_2",
+        "depth_m"
+      ]
+    }
+  }
+}

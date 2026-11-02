@@ -1,0 +1,55 @@
+{
+  "policy_version": "3.4.1",
+  "profiles": {
+    "lite_minimal": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "minimal",
+      "rpm_hint": 15,
+      "rpd_hint": 500,
+      "role": "benchmark_challenger",
+      "safe_rpm": 12,
+      "recommended_daily_cap": 400
+    },
+    "lite_low": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "rpm_hint": 15,
+      "rpd_hint": 500,
+      "role": "production_primary",
+      "safe_rpm": 12,
+      "recommended_daily_cap": 400
+    },
+    "flash38_medium": {
+      "model": "gemini-3.8-flash",
+      "thinking_level": "medium",
+      "rpm_hint": 5,
+      "rpd_hint": 20,
+      "role": "reasoning_escalation",
+      "safe_rpm": 4,
+      "recommended_daily_cap": 15
+    },
+    "flash37_medium": {
+      "model": "gemini-3.7-flash",
+      "thinking_level": "medium",
+      "rpm_hint": 5,
+      "rpd_hint": 20,
+      "role": "fallback",
+      "safe_rpm": 4,
+      "recommended_daily_cap": 15
+    }
+  },
+  "production": {
+    "primary_profile": "lite_low",
+    "escalation_profile": "flash38_medium",
+    "fallback_profile": "flash37_medium",
+    "escalate_below_confidence": 0.6,
+    "cache_enabled": true,
+    "rpm_safety_margin_enabled": true,
+    "max_429_retries": 2,
+    "429_backoff_seconds": [
+      15,
+      30
+    ],
+    "strong_escalation_status": "research_only_not_promoted_by_v3_3_rescue"
+  }
+}

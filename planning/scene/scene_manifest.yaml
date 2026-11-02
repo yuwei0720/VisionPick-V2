@@ -1,0 +1,28 @@
+schema_version: 1
+kind: visionpick_planning_scene
+scene_version: visionpick-0.9-external-realsense-unverified-scene-v2
+status: blocked_unverified_workcell_geometry
+verified: false
+planning_frame: robot_base
+objects: []
+blocking_reasons:
+- Table dimensions and pose in robot_base are not hardware-verified.
+- External RealSense exact model/pose and its support geometry are not hardware-verified.
+- Robot mounting/base-plate geometry is not hardware-verified.
+- Fixed fixture geometry is not hardware-verified.
+- Place container geometry/pose is profile-specific and not yet bound to a verified
+  scene.
+notes:
+- RealSense is not robot-mounted and must not be modeled as a robot link.
+- The user-reported ~480 mm camera height is retained as an approximate workcell fact
+  only; it is not used as a collision pose until calibrated/measured.
+- Phase 2 refuses to advertise a verified scene until these facts are measured and
+  versioned.
+sensor_facts:
+  realsense:
+    mounting: external_workcell_overhead
+    approx_height_above_worktable_mm: 480.0
+    exact_model: null
+    pose_in_robot_base_xyz_mm: null
+    pose_in_robot_base_rpy_deg: null
+    collision_geometry_status: pending_measurement

@@ -1,0 +1,2 @@
+-r requirements-console.txt
+pytest>=8.0

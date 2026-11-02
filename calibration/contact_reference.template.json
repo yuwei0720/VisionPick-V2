@@ -1,0 +1,11 @@
+{
+  "mode": "fixed_base_contact",
+  "measured": false,
+  "name": "固定爪夾右下角",
+  "offset_base_mm": null,
+  "reference_rpy_deg": null,
+  "max_axis_delta_deg": 1.0,
+  "gripper_state": "請填入收集時固定的實際開口/指令值",
+  "reported_origin": "請確認 get_coords 的座標原點：flange 或已設定的 TCP",
+  "_help": "offset_base_mm = 實體角點位置 - 控制器回報原點位置，沿 robot BASE XYZ，單位 mm。測量後填值並設 measured=true。"
+}

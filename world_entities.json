@@ -1,0 +1,264 @@
+{
+  "ontology_version": "2.0.0",
+  "entities": {
+    "remote_car": {
+      "type": "device",
+      "aliases": [
+        "遙控車",
+        "遙控汽車",
+        "remote_car"
+      ],
+      "description": "遙控車。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "robot": {
+      "type": "device",
+      "aliases": [
+        "機器人",
+        "robot"
+      ],
+      "description": "機器人或機器人本體。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "device": {
+      "type": "device",
+      "aliases": [
+        "裝置",
+        "設備",
+        "device"
+      ],
+      "description": "未進一步分類的一般設備。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "flashlight": {
+      "type": "device",
+      "aliases": [
+        "手電筒",
+        "flashlight"
+      ],
+      "description": "手電筒。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "toy_car": {
+      "type": "device",
+      "aliases": [
+        "玩具車",
+        "toy_car"
+      ],
+      "description": "玩具車。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "wireless_mouse": {
+      "type": "device",
+      "aliases": [
+        "無線滑鼠",
+        "滑鼠",
+        "wireless_mouse"
+      ],
+      "description": "無線滑鼠。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "keyboard": {
+      "type": "device",
+      "aliases": [
+        "鍵盤",
+        "keyboard"
+      ],
+      "description": "鍵盤。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "phone": {
+      "type": "device",
+      "aliases": [
+        "手機",
+        "電話",
+        "phone"
+      ],
+      "description": "手機。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "table": {
+      "type": "surface",
+      "aliases": [
+        "桌子",
+        "桌面",
+        "桌上",
+        "table",
+        "desk",
+        "desktop"
+      ],
+      "description": "桌子或桌面表面。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "box": {
+      "type": "container",
+      "aliases": [
+        "盒子",
+        "箱子",
+        "盒中",
+        "箱中",
+        "盒內",
+        "箱內",
+        "盒裡",
+        "箱裡",
+        "box"
+      ],
+      "description": "盒子或容器。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "screw": {
+      "type": "object",
+      "aliases": [
+        "螺絲",
+        "screw"
+      ],
+      "description": "螺絲。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "paper": {
+      "type": "surface",
+      "aliases": [
+        "紙張",
+        "紙",
+        "paper"
+      ],
+      "description": "紙張。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "pencil_mark": {
+      "type": "writing",
+      "aliases": [
+        "鉛筆字",
+        "鉛筆字跡",
+        "鉛筆痕跡",
+        "鉛筆痕",
+        "铅笔痕",
+        "铅笔痕迹",
+        "铅笔字",
+        "铅笔字迹",
+        "pencil writing",
+        "pencil mark"
+      ],
+      "description": "鉛筆留下的字或記號。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "ink_mark": {
+      "type": "writing",
+      "aliases": [
+        "墨水字",
+        "墨水字跡",
+        "原子筆字",
+        "圓珠筆字",
+        "墨水字迹",
+        "原子笔字",
+        "圆珠笔字",
+        "ink writing",
+        "ink mark"
+      ],
+      "description": "紙上的原子筆或墨水字跡。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "cardboard": {
+      "type": "surface",
+      "aliases": [
+        "紙箱",
+        "紙板",
+        "纸箱",
+        "纸板",
+        "cardboard"
+      ],
+      "description": "可做記號的紙箱或紙板表面。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "pencil_lead": {
+      "type": "part",
+      "aliases": [
+        "筆芯",
+        "鉛筆芯",
+        "笔芯",
+        "铅笔芯",
+        "pencil lead"
+      ],
+      "description": "鉛筆替換芯，可作物品描述；目前未登錄為可抓取工具。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    },
+    "document": {
+      "type": "surface",
+      "aliases": [
+        "文件",
+        "文檔",
+        "document"
+      ],
+      "description": "文件。 目前未登錄為可抓取工具與視覺定位物件，僅供用途情境推理；直接要求拿取或搬運本實體時 target 必須為 null，不得替換成相關工具，也不得作為空間參照物。",
+      "role": "semantic_context",
+      "graspable": false,
+      "visual_locatable": false,
+      "capability_scope": "context_only",
+      "executable_actions": []
+    }
+  }
+}

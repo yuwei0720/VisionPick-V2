@@ -1,0 +1,341 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_joint_state": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/JointStateSnapshot"
+        },
+        {
+          "properties": {
+            "source": {
+              "const": "pymycobot.get_angles"
+            }
+          }
+        }
+      ]
+    },
+    "target": {
+      "$ref": "#/$defs/TargetPose"
+    },
+    "robot_model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "robot_model_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scene_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scene_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gripper_state": {
+      "enum": [
+        "OPEN",
+        "CLOSED",
+        "UNKNOWN"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/PayloadSpec"
+    },
+    "validation_level": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "max_state_age_ms": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "current_joint_state",
+    "target",
+    "robot_model_version",
+    "robot_model_hash",
+    "scene_version",
+    "scene_hash",
+    "gripper_state",
+    "payload",
+    "validation_level",
+    "max_state_age_ms"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VisionPick planning validation request v1",
+  "$defs": {
+    "JointStateSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "positions": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "units": {
+          "enum": [
+            "deg",
+            "rad"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at_unix_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "names",
+        "positions",
+        "units",
+        "source",
+        "captured_at_unix_ms",
+        "sequence"
+      ]
+    },
+    "TargetPose": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "xyz_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "rpy_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame_id",
+        "xyz_mm",
+        "rpy_deg",
+        "label"
+      ]
+    },
+    "PayloadSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "NONE",
+            "ATTACHED"
+          ]
+        },
+        "object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dimensions_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "attach_link": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "touch_links": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pose_xyz_mm": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "pose_rpy_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "state",
+        "object_id",
+        "shape",
+        "dimensions_mm",
+        "attach_link",
+        "touch_links",
+        "pose_xyz_mm",
+        "pose_rpy_deg"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "ATTACHED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "shape": {
+                "const": "box"
+              },
+              "object_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "attach_link": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimensions_mm": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "touch_links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CollisionContact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body_1": {
+          "type": "string"
+        },
+        "body_2": {
+          "type": "string"
+        },
+        "body_type_1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "body_type_2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "depth_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "body_1",
+        "body_2",
+        "body_type_1",
+        "body_type_2",
+        "depth_m"
+      ]
+    }
+  }
+}
