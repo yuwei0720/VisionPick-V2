@@ -50,7 +50,7 @@ def validate_baseline(cfg):
         "gripper close speed": (r["gripper"].get("close_speed", 80), 80),
         "model confidence": (cfg["model"].get("confidence", .35), .35),
         "model IoU": (cfg["model"].get("iou", .5), .5),
-        "warmup frames": (cfg["camera"].get("warmup_frames", 15), 15),
+        "warmup frames": (cfg["camera"].get("warmup_frames", 30), 30),
     }
     for label, (value, expected) in checks.items():
         if isinstance(value, bool) or value != expected: raise ValueError(f"V6 policy locked: {label}={expected}")
