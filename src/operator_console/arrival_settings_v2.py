@@ -61,8 +61,8 @@ class ArrivalSettingsStoreV2:
             raise ValueError("robot_config_required")
         robot = config["robot"]
         settings = ArrivalSettings.from_config(robot, overrides)
-        if settings.motion_poll_interval_s < 0.25:
-            raise ValueError("motion_poll_interval_s_must_be_at_least_0.25")
+        if settings.motion_poll_interval_s < 1.0:
+            raise ValueError("motion_poll_interval_s_must_be_at_least_1.0")
         sources = tuple((key, "ui_override" if key in overrides else "config" if key in robot else "program_default")
                         for key in settings.to_dict())
         identity = {"values": settings.to_dict(), "sources": dict(sources), "overrides": overrides}

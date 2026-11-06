@@ -1,8 +1,8 @@
 """One V2 execution loop for the complete bounded plan, with instance selection.
 
 Camera/geometry/controller implementations are explicit injected boundaries.
-This module never parses original language, selects a largest/nearest instance,
-retries commands, or treats controller completion as a verified object outcome.
+Optional local checks allow one empty-hand step retry with the original endpoint.
+Controller completion remains separate from the observed object result.
 """
 from __future__ import annotations
 
@@ -52,7 +52,8 @@ class TaskSequenceV2:
 
     def __init__(self, pending, *, run_id, observe, prepare, execute,
                  initialization_policy, max_scene_age_ms=30000.0, clock_ms=None,
-                 initialize_before_observe=None, step_recovery_enabled=False, persist_boundary=None):
+                 initialize_before_observe=None, step_recovery_enabled=False, persist_boundary=None,
+                 check_result=None, observe_completion=None):
         if initialization_policy not in {"each_task", "once"}:
             raise SequenceV2Error("explicit_initialization_policy_required")
         if not isinstance(run_id, str) or not run_id:
@@ -63,6 +64,7 @@ class TaskSequenceV2:
         self.pending = pending
         self.run_id = run_id
         self.observe, self.prepare, self.execute = observe, prepare, execute
+        self.check_result, self.observe_completion = check_result, observe_completion
         if initialize_before_observe is not None and not callable(initialize_before_observe):
             raise SequenceV2Error("initialization_callback_must_be_callable")
         self.initialize_before_observe = initialize_before_observe
@@ -141,7 +143,15 @@ class TaskSequenceV2:
             return self.snapshot()
 
     def _roles(self):
-        task = self._steps[self._step]["task"]
+        step = self._steps[self._step]
+        task = step["task"]
+        if step.get('retry_count'):
+            from integration.relative_placement import match_result_target
+            target = match_result_target(step['result_expectation'], self._observation.instances)
+            if target is None or not target['eligible']:
+                raise SequenceV2Error('retry_target_not_graspable')
+            self._selected['target'] = target['instance_id']
+            self._selected['locked_destination'] = deepcopy(step['result_expectation'])
         if task['destination_type'] == 'relative' and task['target'] == task['reference']:
             matches = [i for i in self._observation.instances if i['class_name'] == task['target']]
             if not any(t['eligible'] and any(r['instance_id'] != t['instance_id'] and eligible_for_role(r, 'reference') for r in matches) for t in matches):
@@ -168,6 +178,10 @@ class TaskSequenceV2:
                 if self._pause_missing_step(role,task[field],detected=bool(matches)):
                     return False
                 raise SequenceV2Error(f"no_eligible_{role}_instance")
+            if step.get('retry_count') and role == 'reference' and not initial:
+                original = step['reference_snapshot']['xyz_mm'][:2]
+                matches = [min((i for i in matches if i['eligible']), key=lambda i:
+                    math.dist(i['xyz_mm'][:2], original))]
             if len(matches) == 1:
                 self._selected[role] = matches[0]["instance_id"]
                 if initial:
@@ -186,6 +200,100 @@ class TaskSequenceV2:
             self._record('step_pre_pick_snapshot', anchor=self._selected['self_anchor'])
         return True
 
+    def _retry_current_step(self, reason, observation=None):
+        step = self._steps[self._step]
+        if step.get('retry_count', 0) >= 1:
+            raise SequenceV2Error('step_retry_exhausted: ' + reason)
+        step.update(retry_count=1, status='pending')
+        self._observation = observation
+        self._selected = {}
+        self._question = None
+        self._initialized_step = self._safe_start_step = self._step if observation else None
+        self._refresh_start_required = observation is None
+        self._record('step_retry_scheduled', reason=reason, retry_count=1)
+
+    def _retry_perception_once(self, error, *, phase):
+        """One fresh observation per step/phase, with no motion or plan replay."""
+        self.checkpoint()
+        reason = getattr(error, 'reason', str(error))
+        recoverable = reason in {
+            'unreliable_object_depth', 'unreliable_detection_geometry', 'invalid_rgbd_frame',
+            'result_target_depth_unavailable', 'result_target_not_observed',
+            'destination_depth_unavailable', 'camera_capture_timeout',
+        }
+        if type(error).__name__ == 'RealSenseError':
+            recoverable = '取 frame 失敗' in reason or '不完整的 RGB-D frame' in reason
+        if phase == 'before' and reason.startswith('no_eligible_') and self._question:
+            matches = [i for i in self._observation.instances if i['class_name'] == self._question['class_name']]
+            key = 'reference_rejection_reason' if self._question['role'] == 'reference' else 'rejection_reason'
+            recoverable = not matches or all(i.get(key) in {
+                'unreliable_object_depth', 'unreliable_detection_geometry', 'invalid_depth'
+            } for i in matches)
+        step = self._steps[self._step]
+        counter = 'perception_recaptures_' + phase
+        if not recoverable or step.get(counter, 0) >= 1 or self._safe_start_step != self._step:
+            return False
+        step[counter] = 1
+        if phase == 'before':
+            self._observation = None
+            self._selected = {}
+            self._question = None
+            self._status = 'running'
+            step['status'] = 'pending'
+            if self._step == 0 and 'result_expectation' not in step:
+                self._initial_instances = self._initial_frame_id = None
+        self._record('perception_recapture_scheduled', phase=phase, reason=reason, count=1)
+        return True
+
+    def _check_step_result(self):
+        step = self._steps[self._step]
+        final = self._step == len(self._steps) - 1
+        if not final or step.pop('result_requires_start', False):
+            initialized = self.initialize_before_observe(self._step + (1 if final else 2), checkpoint=self.checkpoint)
+            self.checkpoint()
+            if (initialized.get('control_completed') is not True or initialized.get('start_verified') is not True
+                    or initialized.get('empty_hand_confirmed') is not True):
+                raise SequenceV2Error('result_check_requires_empty_start')
+            self._record('start_verified_before_observation')
+        force = False
+        previous_frame = None
+        previous_time = step['captured_at_unix_ms']
+        while True:
+            try:
+                observed = (self.observe_completion(force=True) if force else self.observe_completion()) if final else self.observe(self._step + 2)
+                self.checkpoint()
+                self._validate_observation(observed)
+                if observed.frame_id == previous_frame or observed.captured_at_unix_ms <= previous_time:
+                    raise SequenceV2Error('completion_observation_not_new')
+                previous_frame, previous_time = observed.frame_id, observed.captured_at_unix_ms
+                checked = self.check_result(step['result_expectation'], observed)
+                break
+            except (ValueError, RuntimeError) as exc:
+                if not self._retry_perception_once(exc, phase='result'):
+                    raise
+                force = True
+        step['local_result_check'] = _json_copy(checked)
+        self._record('local_result_checked', frame_id=observed.frame_id, **checked)
+        if not checked['passed']:
+            self._last_display = _json_copy(observed.display)
+            self._retry_current_step('local_result_outside_tolerance', observed)
+            return
+        with self._lock:
+            self.checkpoint()
+            step['status'] = 'completed'
+            self._record('step_completed', control_completed=step['result']['control_completed'], outcome_verified=False)
+            self._step += 1
+            self._observation = None if final else observed
+            self._selected = {}
+            self._question = None
+            if final:
+                self._status = 'completed'
+                self.pending.finish(outcome='completed')
+            else:
+                self._initialized_step = self._safe_start_step = self._step
+                self._last_display = _json_copy(observed.display)
+                self._record('observed', frame_id=observed.frame_id)
+
     def advance(self):
         with self._lock:
             if self._status != "running":
@@ -195,6 +303,9 @@ class TaskSequenceV2:
             self._busy = True
         try:
             self.checkpoint()
+            if self._steps[self._step]['status'] == 'checking_result':
+                self._check_step_result()
+                raise _AwaitingInstance
             if (self.initialize_before_observe is not None
                     and self._initialized_step != self._step
                     and (self.policy == "each_task" or self._step == 0 or self._refresh_start_required)):
@@ -260,15 +371,35 @@ class TaskSequenceV2:
             self.checkpoint()
             self._age_check(observation)
             with self._lock:
-                self._steps[self._step].update(status="executing", frame_id=observation.frame_id, selected=selected)
+                step = self._steps[self._step]
+                if self.check_result:
+                    step.setdefault('result_expectation', _json_copy(prepared['result_expectation']))
+                    if 'reference' in selected and 'reference_snapshot' not in step:
+                        step['reference_snapshot'] = deepcopy(selected.get('initial_reference') or next(
+                            i for i in observation.instances if i['instance_id'] == selected['reference']))
+                step.update(status="executing", frame_id=observation.frame_id, selected=selected,
+                            captured_at_unix_ms=observation.captured_at_unix_ms)
                 self._record("step_started", frame_id=observation.frame_id, selected=selected)
             # Outside the sequence lock: runtime snapshots also acquire this lock.
             # Persist executing/step_started before execute can dispatch hardware.
             if self.persist_boundary:
                 self.persist_boundary()
             self.checkpoint()
-            result = self.execute(prepared, initialize=self.initialize_before_observe is None and (self.policy == "each_task" or self._step == 0),
-                                  checkpoint=self.checkpoint)
+            try:
+                result = self.execute(prepared, initialize=self.initialize_before_observe is None and (self.policy == "each_task" or self._step == 0),
+                                      checkpoint=self.checkpoint)
+            except Exception as exc:
+                self.checkpoint()  # A cancellation wrapped by the transport is never retryable.
+                if self.check_result and getattr(exc, 'retry_empty_hand', False):
+                    self._retry_current_step(str(exc))
+                    raise _AwaitingInstance
+                if self.check_result and getattr(exc, 'check_released_result', False):
+                    step.update(status='checking_result', result={'control_completed':False,
+                                'outcome_verified':False, 'arrival_verified':False, 'ik_validated':False,
+                                'path_validated':False, 'collision_validated_3d':False},
+                                result_requires_start=True, motion_error=str(exc))
+                    raise _AwaitingInstance
+                raise
             self.checkpoint()
             evidence = result.get("transfer_evidence") if isinstance(result, dict) else None
             transfer_records = [e for e in evidence if isinstance(e, dict) and e.get("record_type") != "vertical_motion"] if isinstance(evidence, list) else []
@@ -296,6 +427,9 @@ class TaskSequenceV2:
                 result = {**result, "ik_validated": proven_ik}
             with self._lock:
                 self.checkpoint()
+                if self.check_result:
+                    step.update(status='checking_result', result=_json_copy(result))
+                    raise _AwaitingInstance
                 self._steps[self._step].update(status="completed", result=_json_copy(result), outcome_verified=False)
                 self._record("step_completed", control_completed=True, outcome_verified=False)
                 self._step += 1
@@ -306,10 +440,15 @@ class TaskSequenceV2:
                     self._status = "completed"
                     self.pending.finish(outcome="completed")
         except _AwaitingInstance:
-            pass
+            if self._status == 'waiting_step_recovery' and self._question:
+                self._retry_perception_once(self._question['code'], phase='before')
         except Exception as exc:
             with self._lock:
-                if not self._cancelled.is_set():
+                before_motion = (self._step < len(self._steps)
+                                 and self._steps[self._step]['status'] not in {'executing', 'checking_result'})
+                recapturing = (not self._cancelled.is_set() and before_motion
+                              and self._retry_perception_once(exc, phase='before'))
+                if not self._cancelled.is_set() and not recapturing:
                     self._status = "failed"
                     self._error = {"type": type(exc).__name__, "reason": str(exc), "step_id": self._step + 1}
                     if self._step < len(self._steps):

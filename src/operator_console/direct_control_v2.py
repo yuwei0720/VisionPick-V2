@@ -1,10 +1,10 @@
-"""Direct V2 pick/place with endpoint geometry and fixed-wait completion.
+"""Direct V2 pick/place with minimum waits and low-rate endpoint confirmation.
 
 Long transfers prefer joints via Preferred IK, standard IK, then Cartesian.
 Vertical motion remains Cartesian; solver results never claim path validation.
-V2 releases motion after a fixed physical wait. Feedback is optional telemetry,
-never arrival proof. This class cannot interrupt a blocking SDK transport call
-or certify the actual trajectory, arrival, grasp or physical placement.
+Intermediate points keep fixed waits; endpoints require bounded fresh feedback.
+This class cannot interrupt a blocking SDK transport call or certify the actual
+trajectory, grasp, physical placement or the freshness of device-side samples.
 """
 from __future__ import annotations
 
@@ -19,11 +19,11 @@ from .robot_adapter import OperatorRobotController, dispatch_result_failed
 
 @dataclass(frozen=True)
 class ArrivalSettings:
-    pose_verify_stable_polls: int = 1
+    pose_verify_stable_polls: int = 2
     pose_verify_position_tolerance_mm: float = 20.0
     pose_verify_orientation_tolerance_deg: float = 8.0
     motion_timeout_s: float = 12.0
-    motion_poll_interval_s: float = 0.5
+    motion_poll_interval_s: float = 1.0
     place_joint_verify_tolerance_deg: float = 5.0
 
     def __post_init__(self):
@@ -59,11 +59,10 @@ def _six(value, name):
 
 
 class DirectRobotControllerV2(OperatorRobotController):
-    """Frozen settings; serial timeouts permit one retry before fixed-wait completion.
+    """Current-frame geometry, minimum waits and low-rate endpoint arrival checks.
 
-    Only an upstream, current-frame geometry pass permits a complete task. All
-    generated endpoint poses are bounded again before initialization or gripping.
-    Start dispatches configured joints and waits; telemetry never proves arrival.
+    Only an upstream geometry pass permits dispatch. Joint feedback confirms joints,
+    not a separately measured TCP pose; neither confirms grasp or physical placement.
     """
 
     def __init__(self, config, *, backend=None, settings=None, clock_fn=time.monotonic,
@@ -89,7 +88,7 @@ class DirectRobotControllerV2(OperatorRobotController):
         self.transfer_evidence = []
         self._last_movement_activity = None
         self._vertical_continuation = None
-        self.motion_completion_policy = "fixed_wait"
+        self.motion_completion_policy = "minimum_wait_then_feedback"
 
     def _event(self, stage, event, *, status="ok", **data):
         # The inherited gripper method emits this after its last checkpoint and
@@ -127,10 +126,43 @@ class DirectRobotControllerV2(OperatorRobotController):
         return value
 
     def _feedback(self, kind):
-        # The installed SDK already retries its transport up to three times.
-        actual = self._try_get_angles() if kind == "joint" else self._try_get_coords()
-        self._last_movement_activity = self._clock()
-        return actual
+        # One application query only; the installed SDK has its own bounded retries.
+        from numbers import Real
+        interval = max(1.0, self.arrival.motion_poll_interval_s)
+        previous = getattr(self, '_last_feedback_finished', None)
+        if previous is not None:
+            remaining = interval - (self._clock() - previous)
+            if remaining > 0:
+                self.sleep(remaining)
+        self._before_command()
+        # Never flush while an SDK transaction holds its transport lock.
+        lock = getattr(self.mc, 'lock', None)
+        if lock is not None and getattr(self.mc, 'thread_lock', False):
+            with lock:
+                self._clear_serial_buffer()
+        else:
+            self._clear_serial_buffer()
+        method = {'joint':'get_angles', 'cartesian':'get_coords',
+                  'controller_error':'get_error_information'}[kind]
+        try:
+            raw = getattr(self.mc, method)()
+        except Exception:
+            raw = None
+        finally:
+            self._last_feedback_finished = self._last_movement_activity = self._clock()
+        self._before_command()
+        if kind == 'controller_error':
+            return int(raw) if isinstance(raw, Real) and not isinstance(raw, bool) and math.isfinite(raw) and raw >= 0 and raw == int(raw) else None
+        if (not isinstance(raw, (list, tuple)) or len(raw) != 6
+                or any(isinstance(v, bool) or not isinstance(v, Real) or not math.isfinite(v) for v in raw)):
+            return None
+        # Bounds match this project's pymycobot.mycobot.MyCobot backend (280 M5),
+        # not the operator workspace; a real workspace excursion is not bad data.
+        lower = [-168,-135,-150,-145,-165,-180] if kind == 'joint' else [-350,-350,-70,-180,-180,-180]
+        upper = [168,135,150,145,165,180] if kind == 'joint' else [350,350,523.9,180,180,180]
+        if any(not lo <= v <= hi for v,lo,hi in zip(raw,lower,upper)):
+            return None
+        return [float(v) for v in raw]
 
     def _move(self, kind, target, *, label, speed, mode=None, endpoint=None, stable_count=None, grasp_endpoint=False,
               vertical_stage=None, waypoint_index=None, intermediate=False):
@@ -173,67 +205,121 @@ class DirectRobotControllerV2(OperatorRobotController):
                 'vertical_motion_mode':policy, 'sdk_mode':sdk_mode, 'target_pose_mm_deg':list(target),
                 'motion_completed':False, 'ik_validated':False, 'path_validated':False}
             self.transfer_evidence.append(vertical_evidence)
+        vertical_wait = float(self.cfg.get("vertical_endpoint_wait_s", self.cfg.get("vertical_wait_s", 4.0)))
+        transfer_wait = float(self.cfg.get("transfer_wait_s", self.cfg.get("cross_zone_wait_s", 3.0)))
+        intermediate_wait = float(self.cfg.get("intermediate_wait_s", 0.35))
+        wait_s = intermediate_wait if intermediate else vertical_wait if vertical_stage is not None or grasp_endpoint else transfer_wait
+        if not math.isfinite(wait_s) or wait_s < 0:
+            raise RobotError('invalid_motion_wait')
         self.at_start = False
+        self._last_arrival_verified = False
         result = None
         send_results = []
         dispatch_attempts = 1
+        controller_code, controller_checked = None, False
         self._clear_serial_buffer()
         try:
             result = send(target, speed) if kind == "joint" else send(target, speed, mode)
             send_results.append(result)
             if result == -1 and getattr(self.mc, "_serial_port", None) is not None:
-                self._clear_serial_buffer()
-                self.sleep(0.2)
-                self._before_command()
-                self._event("motion", "dispatch_retry", label=label, kind=kind, target=target,
-                            mode=mode, attempt=2, previous_send_result=result, retry_wait_s=0.2)
-                self.command_count += 1
-                dispatch_attempts += 1
-                result = send(target, speed) if kind == "joint" else send(target, speed, mode)
-                send_results.append(result)
+                # A lost send acknowledgement is not proof that motion was rejected.
+                self._last_feedback_finished = self._clock()
+                for _ in range(2):
+                    controller_code = self._feedback('controller_error')
+                    if controller_code is not None:
+                        break
+                controller_checked = True
+                if controller_code == 0:
+                    retry_wait = max(1.0, self.arrival.motion_poll_interval_s)
+                    self.sleep(retry_wait)
+                    self._before_command()
+                    self._event("motion", "dispatch_retry", label=label, kind=kind, target=target,
+                                mode=mode, attempt=2, previous_send_result=result, retry_wait_s=retry_wait)
+                    self.command_count += 1
+                    dispatch_attempts += 1
+                    result = send(target, speed) if kind == "joint" else send(target, speed, mode)
+                    send_results.append(result)
+                    # A second failure needs a new diagnostic, not the pre-resend code.
+                    controller_checked = False
             if dispatch_result_failed(result):
                 raise RobotError(f'{label} rejected send result: {result!r}')
         except Exception as exc:
             self._last_movement_activity = self._clock()
+            code = controller_code
+            if not controller_checked:
+                self._last_feedback_finished = self._clock()
+                for _ in range(2):
+                    code = self._feedback('controller_error')
+                    if code is not None:
+                        break
             self._event("motion", "dispatch_failed", status="error", label=label, error_type=type(exc).__name__,
                         send_result=result, target=target, send_results=send_results, dispatch_attempts=dispatch_attempts,
-                        controller_error=self._try_get_error_information())
-            raise RobotError(f"{label}_dispatch_failed") from exc
+                        controller_error=code)
+            error = RobotError(f"{label}_dispatch_failed")
+            error.motion_stage = label
+            error.retry_empty_hand = (not self.gripper_holding_uncertain and code == 0
+                                      and (label == 'pick_pregrasp' or label.startswith('grasp_descent')))
+            error.check_released_result = (not self.gripper_holding_uncertain and code == 0
+                                           and label.startswith('place_retreat'))
+            raise error from exc
         self._last_movement_activity = self._clock()
-        # The bounded serial retry adds no coordinate polling or arrival gate.
-        vertical_wait = float(self.cfg.get("vertical_endpoint_wait_s", self.cfg.get("vertical_wait_s", 4.0)))
-        transfer_wait = float(self.cfg.get("transfer_wait_s", self.cfg.get("cross_zone_wait_s", 3.0)))
-        intermediate_wait = float(self.cfg.get("intermediate_wait_s", 0.35))
-        wait_s = intermediate_wait if intermediate else vertical_wait if vertical_stage is not None or grasp_endpoint else transfer_wait
+        # Keep the existing minimum physical wait; only endpoints add arrival checks.
         self.sleep(wait_s)
         self._before_command()
         actual, errors = None, {}
+        interval = max(1.0, self.arrival.motion_poll_interval_s)
         if not intermediate:
-            try:
-                actual = self._feedback(kind)  # Exactly one best-effort sample.
-            except Exception as exc:
-                errors["telemetry_error_type"] = type(exc).__name__
-            if kind == "joint":
-                errors["joint_error_deg"] = max(self._angle_error_deg(a, b) for a, b in zip(actual, target)) if actual else None
-            else:
-                pos, ori = self._pose_errors(target, actual)
-                errors.update(position_error_mm=pos if math.isfinite(pos) else None,
-                              orientation_error_deg=ori if math.isfinite(ori) else None,
-                              z_error_mm=abs(actual[2] - target[2]) if actual is not None else None,
-                              grasp_endpoint=grasp_endpoint)
-            self._event("motion", "feedback_sampled", label=label, kind=kind, actual=actual,
-                        best_effort=True, arrival_verified=False, elapsed_s=self._clock() - started, **errors)
+            # This is a confirmation deadline AFTER the retained minimum wait.
+            # A blocking SDK call cannot be interrupted; late replies never pass.
+            deadline = self._clock() + self.arrival.motion_timeout_s
+            stable, invalid = 0, 0
+            while True:
+                self._before_command()
+                if self._clock() >= deadline:
+                    raise RobotError(f'{label}_arrival_timeout')
+                actual = self._feedback(kind)
+                if self._clock() > deadline:
+                    raise RobotError(f'{label}_arrival_timeout')
+                if actual is None:
+                    stable = 0
+                    invalid += 1
+                    self._event('motion', 'feedback_invalid', label=label, invalid_count=invalid,
+                                effective_poll_interval_s=interval, arrival_verified=False)
+                    if invalid >= 3:
+                        raise RobotError(f'{label}_feedback_unavailable')
+                else:
+                    invalid = 0
+                    if kind == 'joint':
+                        error = max(self._angle_error_deg(a,b) for a,b in zip(actual,target))
+                        errors = {'joint_error_deg':error}
+                        arrived = error <= self.arrival.place_joint_verify_tolerance_deg
+                    else:
+                        pos, ori = self._pose_errors(target,actual)
+                        errors = {'position_error_mm':pos,'orientation_error_deg':ori,
+                                  'z_error_mm':abs(actual[2]-target[2]),'grasp_endpoint':grasp_endpoint}
+                        arrived = (pos <= self.arrival.pose_verify_position_tolerance_mm
+                                   and ori <= self.arrival.pose_verify_orientation_tolerance_deg)
+                    stable = stable + 1 if arrived else 0
+                    self._event('motion', 'feedback_sampled', label=label, kind=kind, actual=actual,
+                                stable_count=stable, required_stable_polls=required,
+                                effective_poll_interval_s=interval, arrival_verified=stable >= required,
+                                elapsed_s=self._clock()-started, **errors)
+                    if stable >= required:
+                        self._last_arrival_verified = True
+                        break
+                self.sleep(min(interval,max(0.0,deadline-self._clock())))
         self._before_command()
+        basis = 'fixed_wait_intermediate' if intermediate else 'minimum_wait_then_feedback'
         self._event("motion", "movement_completed", label=label, kind=kind, actual=actual,
                     send_result=result, send_results=send_results, dispatch_attempts=dispatch_attempts,
-                    intermediate=intermediate, wait_s=wait_s,
-                    completion_basis="fixed_wait", arrival_verified=False, controller_error=None)
-        # Optional telemetry must never populate a verified-arrival cache.
+                    intermediate=intermediate, wait_s=wait_s, effective_poll_interval_s=interval,
+                    completion_basis=basis, arrival_verified=self._last_arrival_verified, controller_error=None)
         self._last_movement_activity = self._clock()
         if intermediate:
             self._vertical_continuation = (vertical_stage, waypoint_index)
         if vertical_evidence is not None:
-            vertical_evidence.update(motion_completed=True, completion_basis="fixed_wait", arrival_verified=False)
+            vertical_evidence.update(motion_completed=True, completion_basis=basis,
+                                     arrival_verified=self._last_arrival_verified)
         return actual
 
     def move_pose(self, pose, *, mode=None, label="pose", stable_count=None, grasp_endpoint=False,
@@ -259,13 +345,13 @@ class DirectRobotControllerV2(OperatorRobotController):
         grasp_endpoint = label in {"grasp_descent", "grasp_descend"}
         waypoints = self._build_vertical_waypoints(start, end, fine_near_end=fine) or [end]
         return [("pose", self._pose(p), label if len(waypoints) == 1 else f"{label}[{i}]",
-                 (mode, 1, grasp_endpoint and i == len(waypoints), label, i, i < len(waypoints)))
+                 (mode, None, grasp_endpoint and i == len(waypoints), label, i, i < len(waypoints)))
                 for i, p in enumerate(waypoints, 1)]
 
     def initialize_for_pick(self):
         """Empty-hand Start before capture; start_verified is a legacy lifecycle flag.
 
-        Fixed-wait release never certifies the actual joints or TCP arrival.
+        Start requires joint feedback within the configured joint tolerance.
         """
         self._require()
         if self.gripper_holding_uncertain:
@@ -297,9 +383,9 @@ class DirectRobotControllerV2(OperatorRobotController):
         if settle_s > 0:
             self.sleep(settle_s)
         self._event("initialization", "start_verified_before_capture", actual_angles=actual,
-                    completion_basis="fixed_wait", arrival_verified=False)
+                    completion_basis=self.motion_completion_policy, arrival_verified=True)
         self.at_start = True
-        return {"control_completed": True, "start_verified": True}
+        return {"control_completed": True, "start_verified": True, "arrival_verified": True}
 
     def _program(self, grasp, place, initialize, return_to_start=False):
         if type(return_to_start) is not bool:
@@ -402,4 +488,6 @@ class DirectRobotControllerV2(OperatorRobotController):
                 "legacy_transit_executed": False,
                 "legacy_transit_policy": "retained_asset_not_executed_by_hybrid_transfer",
                 "collision_validated_3d": False, "arrival_settings": self.arrival.to_dict(),
-                "completion_basis": "fixed_wait", "arrival_verified": False}
+                "completion_basis": self.motion_completion_policy,
+                "arrival_verified": (getattr(self, '_last_arrival_verified', False)
+                    and bool(transfer_records) and all(e.get('arrival_verified') is True for e in transfer_records))}

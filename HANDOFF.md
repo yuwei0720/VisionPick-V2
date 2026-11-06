@@ -1,40 +1,55 @@
 # AI Handoff
 
-更新：2026-11-02（Asia/Taipei）。實際工作根目錄：此檔所在的內層 VisionPick_V2_Final_Version。外層報告與簡報未修改。
+更新：2026-11-06（Asia/Taipei）。本檔所在目錄就是程式倉庫根目錄；先讀 AGENTS.md 與 [雙電腦流程](docs/TWO_PC_WORKFLOW.md)。
 
 ## Current Focus
 
-- 使用者要求純 V2 架構、原生站點／桌面標定、四分頁工程抽屜、100vh 主畫面與 GitHub 整備；使用者後續明確指示「先整理不上傳」。
-- 正式入口只載入 service_v2／runtime_v2；V1 無正式路由或 import。47 份退役程式、頁面與舊操作文件保存在本機 _deprecated_v1/，排除 Git 與打包。
+- 報告最新標準為 `VisionPick_成果報告_1105_第三版.docx`，另存原電腦，不是本倉庫必要執行檔。
+- 使用者已授權保存目前基準、加標籤並上傳既有 yuwei0720/VisionPick-V2 倉庫，取代先前不提交／不上傳限制。仍僅做局部檢查，不自動啟動設備或模型 API。
+- 出發標籤 pre-hardware-20261106；實機分支 hardware/acceptance-01。原電腦保留 main，未驗收修改與結果先上測試分支。
+- 不新增 Agent、重試管理類別／例外框架或 LLM 呼叫，不改 Prompt／任務格式。
+- 物品結果門檻不變：XY／疊放高度各 20 mm、Named 位移 25 mm 或不可見通過，短位移未動仍可通過。不是物理精度／入盒證據。
+- 同名配對歧義按使用者要求暫緩；實機初驗限制每類一件。
 
 ## Last Meaningful Changes
 
-- 新 service_v2 管理設定與共用資產，不繼承 V1。server 僅提供 V2 UI 與 /api/v2/；/legacy/ 及 V1 API 回傳 404。
-- runtime_v2 原生讀取 TCP／六軸角、Free mode 進出、Start 復位、RGB-D 擷取、四旋轉 ROI 逆轉換及桌面標定。
-- 示教保存真實姿態與 PLACE 配對關節角，儲存後啟用並同步 registry；不推造 PRE-PLACE 配對角。ROI 固定使用 rgbd_envelope 檢查。
-- 桌面數值納入運動指紋；僅同步原有效站點。站點／桌面／registry／事件寫入失敗會回復。扭力釋放失敗保留租約，未使用租約則釋放。
-- 保留相機、18 點剛體標定、OBB 幾何、底層控制、relative_placement、hybrid_transfer 與 voice_input；移出舊任務模型與 A/B/C 業務。
-- 工程抽屜分為站點與標定、抓取與幾何、運動與夾爪、診斷與紀錄；保留主畫面網格，增加 pointer 拖曳與數字 ROI 替代。
-- README.md、.gitignore、依賴盤點工具與回歸測試已更新。完整拆分證據見 docs/V2_MIGRATION_AUDIT.md；測試與限制見 docs/V2_VERIFICATION.md。
+- 第一輪（11/05）：本地結果檢查＋當步最多一次重做，保留首次終點／疊放期望，不重呼叫 LLM。第二輪（11/06）內容如下。
+- 修改前完整快照 VisionPick_V2_修改前完整快照_20261106.zip 仍保留在原電腦，649 檔，CRC 與逐檔 SHA-256 已核對；本次發布前另存來源快照。
+- ZIP SHA-256：`570c9f8d2c0bf63e686379b66e699724cf1c12d65589990eb09791810555b8fa`。同目錄 JSON 清單保留逐檔雜湊。
+- 共用夾爪函式拒絕 False／負值；失敗不再發出開合成功事件或清除 V2 持物限制。None／數值 0 保留既有契約。
+- V2 回讀單次 SDK 查詢、驗六項有限數值及本專案 MyCobot 模型範圍；清接收緩衝時尊重 SDK transport lock。
+- 端點保留原等待後確認，正式 YAML 設為 1.5 秒／連續兩次容差內；中間插補點不查詢。類別預設為 1.0 秒，呼叫端實際間隔下限 1 秒；設定儲存層拒絕小於 1 秒。
+- motion_timeout_s 從原等待結束後起算，包含查詢耗時；三次連續無效回覆停止，晚於期限的有效回覆不通過。阻塞 SDK 呼叫不能被期限搶先中止。
+- 發送 -1 之後先低頻查錯、最多兩次；僅明確 0 才允許既有一次動作重送。整步空手重做／放開後結果檢查也僅對明確 0 開放，未知與非零均停止。
+- Start、垂直終點與控制結果接上到位證據；hybrid transfer 複用關節確認，不額外立即查 TCP，不宣稱獨立 TCP 到位。
+- 重試落點遮罩沿用選定目標 footprint＋量測高度，涵蓋 locked_destination；其他障礙與深度缺失仍拒絕。
+- 每步執行前／結果檢查各最多一次純重拍，獨立於動作重做；不重做 Start／動作／LLM。僅列出的取像／深度／漏檢可恢復；碰撞、越界及有效結果超差不靠重拍繞過。
+- 重拍清除舊選取，必要時重建尚未動作的初始快照；結果重拍保留首次期望。最後取像支援 force，避免快取重用，並檢查影像 ID 與時間更新。
+- 更新控制器測試契約與整合替身期限，新增 tests/test_bounded_recovery_v2.py。標定、模型、operator_data 未修改。
+- 新增 [操作說明](docs/TWO_PC_WORKFLOW.md)與 [結果範本](test_records/TEMPLATE.md)：摘要隨 Git，完整證據 ZIP 另存 Releases 附件。現階段使用 Desktop 與手動封存／下載，沒有新增同步程式。
 
 ## Open Decisions / Risks
 
-- 未做實際相機、串口、Free mode 或實物抓放驗收；fixed wait、active/ready 及軟體測試不證明實際到位或物件結果。
-- 原工作站 operator_data/、config/v0.yaml、標定與權重保留；舊站點因安全指紋政策更新須在現場確認後重驗。Git 排除 operator_data/，乾淨副本從空站點開始。
-- Impeccable 偵測器仍有既有主畫面小字／風格提示，沒有宣稱完成全面無障礙驗收；見驗證文件。
-- 本機 Git 已初始化，未設定遠端、未上傳；使用者尚未要求發布。
+- 1.5 秒是應用層端點／診斷查詢間隔，不是已證明的 ESP32 穩定頻率；SDK 內部最多三次重送與 IK 求解通訊仍存在。
+- 清理與新查詢不能證明裝置端樣本無延遲；到位表示回讀在容差內，不證明抓取、支撐、入盒或路徑安全。
+- outcome_verified／path_validated／collision_validated_3d 仍為 False；arrival_verified 依關節／座標回讀判定，關節確認不等同 TCP 量測。
+- 同名配對、Named 不可見通過、短位移容差及遮罩下方桌面假設維持既有政策。
+- 依使用者要求未驗全專案、其他效能／瀏覽器／硬體與整段流程；舊固定等待效能基準不能沿用為新政策驗收數據。
+- config/v0.yaml、calibration/、models/ 受 Git 追蹤；operator_data/、執行資料、憑證與虛擬環境不隨 Git。現場設定可完整複製到 operator_data/local_config.yaml 並用 --config 選用，不是疊加設定。
+- 第二台需核對 COM 埠、依賴／驅動、模型／韌體、相機／手臂幾何與站點。幾何改變須重新標定，不能直接沿用原站點或持物旗標。
+- 倉庫目前公開，該倉庫的 Releases 附件也公開；上傳前核對金鑰及現場影像內容。
 
 ## Verification Status
 
-- 修改前基線：pytest 771 passed；Node 24 passed。
-- 最終完整 pytest：808 passed、0 failed、0 errors、0 skipped，294.59 秒；2 則第三方棄用警告。development_runs/v2_native_20261102/full_verified.log/xml。
-- Node：28 passed、0 failed、0 skipped；node_final.log。
-- AST：58 個 src 模組、442 個 import；42 個正式入口可達模組；V1 禁用業務 import 0；docs/V2_DEPENDENCY_AUDIT.json。
-- Edge headless：4 分頁、4 旋轉拖曳、示教／ROI 儲存、桌面更新、數字 ROI／Esc 通過；8 張截圖，頁面錯誤 0。1440×900 及 1050／1920 寬均 scrollHeight=clientHeight=900。資料來自受控替身，沒有實體運動。
-- Python compileall 通過。憑證格式掃描匹配 0；本機資料 receipt 14 份的修改時間早於本次工作，原 config/v0.yaml 與修改前 SHA-256 一致。
-- 交付白名單 154 份來源，SHA-256／ZIP CRC 通過；乾淨解包不含 operator_data 或退役檔，CLI help、5 項 Python 定向與 28 項 Node 通過。Git 僅保留本機整理提交，無遠端、未上傳。
+- 函式修改逐一 compile()；分步檢查通過：夾爪 10、遮罩 4、回讀 14、到位／故障 17、接線 3、重拍 10、額外邊界 6。
+- 本次發布前在來源快照重新執行相同 134 個節點：134 passed／0 failed／0 errors／0 skipped；外部網路／原生裝置攔截嘗試 0。[JSON 收據](docs/verification/PRE_HARDWARE_20261106.json)包含 98 個來源／測試／設定／模型／標定檔案雜湊；[JUnit](docs/verification/PRE_HARDWARE_20261106.xml)移除不影響結果的工作站 hostname。
+- 重驗原因：direct_control_v2.py 類別預設與前次測試副本不同（現況 1.0 秒、舊副本 1.5 秒）；保留現況並重驗，不沿用舊收據冒充本版結果。
+- 選取曾因換行差異多納入控制器單檔 170 案例，168 通過／2 失敗；一項連鎖比較斷言已修正，另一項預覽替身期限不足已調整。最終未再跑預覽流程。
+- 最終 134 項是函式／元件測試；未啟動相機、串口、手臂或模型 API。修改前的 843 Python／28 Node 不能作為本版全套結果。
 
 ## Next Step
 
-- 本輪軟體整理與驗證完成；使用 README.md 啟動純 V2 工作台。使用者未要求上傳，不得自行設定遠端或發布。
-- 日後現場啟用時先重驗站點、重測桌面與確認空手；再依現場驗收結果決定是否交付硬體使用。
+- 另一台克隆後切至 hardware/acceptance-01，回報提交編號並核對現場環境；實機動作由操作者確認後進行。
+- 每批先提交受測程式，結束後依範本保存 run ID、人工結果、成功／失敗／中止分母、原始證據 ZIP 與 SHA-256；提交摘要／交接並 Push，確認附件上傳才算完成回傳。
+- 中途結果可先回傳分析；驗收後透過 Pull Request 合併 main，原電腦再 Pull。原始證據另行保存，不能讓程式更新覆蓋另一台現場設定。
+- 實機受控驗收：核對模型／韌體與空手，量測 1.5 秒查詢耗時、失敗率、重送次數、到位等待；驗無效回覆恢復、逾時停止、取消、夾爪失敗與重拍新影像。

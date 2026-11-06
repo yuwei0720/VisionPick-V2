@@ -1,5 +1,7 @@
 # VisionPick V2
 
+另一台電腦實機測試請先讀 [雙電腦操作說明](docs/TWO_PC_WORKFLOW.md)與 [目前交接](HANDOFF.md)。出發標籤為 `pre-hardware-20261106`，實機分支為 `hardware/acceptance-01`；這是實機驗收前基準。
+
 以自然語言安排桌面抓放工作的本機工作台：V2 任務解析、RGB-D／OBB 幾何、具名站點與模組化機械臂控制。前端使用原生 HTML、CSS、ES6 JavaScript，沒有建置程序。
 
 桌面介面維持一頁式相機、步驟進度、解析明細與人工確認；工程抽屜提供「站點與標定」「抓取與幾何」「運動與夾爪」「診斷與紀錄」四個分頁。
@@ -98,4 +100,4 @@ python package_project.py --check
 
 本機 `operator_data/` 不隨 Git 上傳，乾淨副本會建立空站點清單；必須建立本站點、量測桌面並確認空手才能運動。測試使用暫存目錄及控制替身，沒有從測試送出實機運動或付費模型請求。
 
-本次只整理與驗證，不建立遠端、不上傳。[驗證紀錄](docs/V2_VERIFICATION.md)區分軟體通過結果與尚待實機核對事項。
+倉庫已沿用 `yuwei0720/VisionPick-V2`，依使用者授權保存並上傳實機驗收前基準。最新發布前局部驗證見 [134 項收據](docs/verification/PRE_HARDWARE_20261106.json)；[舊拆分驗證紀錄](docs/V2_VERIFICATION.md)屬歷史版本，不是目前全套回歸結果。實機結果依 [批次範本](test_records/TEMPLATE.md)保存，不能只以程式完成狀態判定物理成功。

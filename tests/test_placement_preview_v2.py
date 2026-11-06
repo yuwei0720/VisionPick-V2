@@ -24,6 +24,75 @@ ROOT=Path(__file__).resolve().parents[1]
 def case():return json.loads((ROOT/'tests/data/relative_place_s3_demo.json').read_text(encoding='utf-8'))
 
 
+@pytest.mark.parametrize('kind,relation,xyz,passed',[
+    ('self_relative','right_of',[20,0,0],True),
+    ('self_relative','right_of',[20.01,0,0],False),
+    ('relative','at_initial',[0,0,0],True),
+    ('relative','right_of',[0,20,0],True),
+    ('relative','on_top_of',[0,0,60],True),
+    ('relative','on_top_of',[0,0,60.01],False),
+    ('relative','on_top_of',[21,0,40],False),
+    ('named',None,[24.99,0,0],False),
+    ('named',None,[25,0,0],True),
+])
+def test_local_result_uses_frozen_center_height_or_named_displacement(kind,relation,xyz,passed):
+    from integration.relative_placement import evaluate_local_result
+    expected={'target_object':'pen','destination_type':kind,'spatial_relation':relation,
+        'source_center_robot_xy_mm':[0,0],'destination_center_robot_xy_mm':[0,0],
+        'unselected_centers_mm':[],'expected_top_z_mm':40}
+    observed=[{'instance_id':'new:0','class_name':'pen','xyz_mm':xyz}]
+    result=evaluate_local_result(expected,observed)
+    assert result['passed'] is passed and result['authorizes_motion'] is False
+    assert result['target_instance_id']=='new:0'
+
+
+@pytest.mark.parametrize('kind',['named','relative','self_relative'])
+def test_local_missing_target_only_passes_named_and_invalid_depth_never_means_disappeared(kind):
+    from integration.relative_placement import evaluate_local_result
+    expected={'target_object':'pen','destination_type':kind,'spatial_relation':None,
+        'source_center_robot_xy_mm':[0,0],'destination_center_robot_xy_mm':[50,0],
+        'unselected_centers_mm':[]}
+    if kind=='named':
+        assert evaluate_local_result(expected,[])['basis']=='named_target_not_observed'
+    else:
+        with pytest.raises(SceneGroundingError,match='result_target_not_observed'):
+            evaluate_local_result(expected,[])
+    with pytest.raises(SceneGroundingError,match='result_target_depth_unavailable'):
+        evaluate_local_result(expected,[{'class_name':'pen','xyz_mm':None}])
+
+
+def test_local_same_class_exclusion_is_one_to_one_and_uses_nearest_remaining_target():
+    from integration.relative_placement import match_result_target,evaluate_local_result
+    expected={'target_object':'pen','destination_type':'named','spatial_relation':None,
+        'source_center_robot_xy_mm':[0,0],'destination_center_robot_xy_mm':[9,0],
+        'unselected_centers_mm':[[10,0],[100,0]]}
+    observations=[{'instance_id':str(i),'class_name':'pen','xyz_mm':[x,0,0]}
+                  for i,x in enumerate([9,10,100,40])]
+    assert match_result_target(expected,observations)['instance_id']=='0'
+    assert match_result_target(expected,observations[1:3]) is None
+    assert evaluate_local_result(expected,observations[1:3])['passed']
+
+
+def test_retry_replans_grasp_but_checks_occupancy_at_original_self_destination():
+    c=case();c['task'].update(destination_type='self_relative',reference_object=None)
+    ds,frame,d,p=synthetic_scene(c)
+    first=plan_relative_place(c['task'],ds,frame,deproject=d,project=p,config=c['config'],surface=c['surface'],
+        gap_mm=None,self_displacement_mm=40,captured_at_unix_ms=1000,now_unix_ms=1000)
+    c['objects'][1]['center_uv'][1]-=18  # A partial 15 mm move in this displayed direction.
+    ds,frame,d,p=synthetic_scene(c)
+    retry=plan_relative_place(c['task'],ds,frame,deproject=d,project=p,config=c['config'],surface=c['surface'],
+        gap_mm=None,self_displacement_mm=40,captured_at_unix_ms=2000,now_unix_ms=2000,locked_destination=first)
+    assert retry['destination_center_robot_xy_mm']==first['destination_center_robot_xy_mm']
+    assert retry['source_grasp_plan']!=first['source_grasp_plan']
+    x,y=first['destination_center_robot_xy_mm']
+    c['objects'].append({'class_name':'battery','center_uv':[320+1.2*x,240-1.2*y],
+        'size_px':[20,20],'angle_deg':0,'confidence':.95})
+    ds,frame,d,p=synthetic_scene(c)
+    with pytest.raises(SceneGroundingError,match='gripper_area_occupied'):
+        plan_relative_place(c['task'],ds,frame,deproject=d,project=p,config=c['config'],surface=c['surface'],
+            gap_mm=None,self_displacement_mm=40,captured_at_unix_ms=3000,now_unix_ms=3000,locked_destination=first)
+
+
 def plan(c,**kwargs):
     ds,frame,deproject,project=synthetic_scene(c)
     return plan_relative_place(c['task'],ds,frame,deproject=deproject,project=project,

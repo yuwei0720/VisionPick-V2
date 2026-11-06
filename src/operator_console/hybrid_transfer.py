@@ -74,10 +74,13 @@ def move_hybrid_transfer(controller, pose, *, label, reference_angles=None, taug
     # physical command must never trigger another motion command as a fallback.
     if angles is not None:
         controller.move_joint_target(angles, label=label)
-        if getattr(controller, "motion_completion_policy", None) == "fixed_wait":
-            # V2 already sampled joints once. Do not add a TCP read or arrival gate.
+        policy = getattr(controller, "motion_completion_policy", None)
+        if policy in {"fixed_wait", "minimum_wait_then_feedback"}:
+            # Reuse V2's joint arrival evidence; this does not prove TCP arrival.
             actual = None
-            record.update(completion_basis="fixed_wait", arrival_verified=False)
+            record.update(completion_basis=policy,
+                          arrival_verified=getattr(controller, '_last_arrival_verified', False),
+                          arrival_basis='joint_feedback', tcp_arrival_verified=False)
         else:
             actual = controller._try_get_coords()
             if hasattr(controller, "_last_movement_activity"):
@@ -88,8 +91,11 @@ def move_hybrid_transfer(controller, pose, *, label, reference_angles=None, taug
                           tcp_position_tolerance_mm=35.0, tcp_orientation_tolerance_deg=15.0)
     else:
         actual = controller.move_pose(target, mode=0, label=label)
-        if getattr(controller, "motion_completion_policy", None) == "fixed_wait":
-            record.update(completion_basis="fixed_wait", arrival_verified=False)
+        policy = getattr(controller, "motion_completion_policy", None)
+        if policy in {"fixed_wait", "minimum_wait_then_feedback"}:
+            record.update(completion_basis=policy,
+                          arrival_verified=getattr(controller, '_last_arrival_verified', False),
+                          arrival_basis='cartesian_feedback')
     record["motion_completed"] = True
     controller._event("hybrid_transfer", "transfer_completed", **record, actual_pose=actual)
     return actual

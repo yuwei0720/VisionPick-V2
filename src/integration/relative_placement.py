@@ -348,7 +348,7 @@ def plan_relative_place(task, detections, frame, *, deproject, project, config, 
                         gap_mm, captured_at_unix_ms, now_unix_ms=None,
                         selected_target_index=None, selected_reference_index=None, exact_gap=False,
                          initial_reference=None, self_displacement_mm=None, orientation_override=None,
-                          preview_scene=None, reserved_regions=None):
+                          preview_scene=None, reserved_regions=None, locked_destination=None):
     """Produce a read-only planar or modelled support candidate, preserving or aligning orientation.
 
     surface is an explicitly measured/modelled horizontal robot-frame table.
@@ -574,6 +574,11 @@ def plan_relative_place(task, detections, frame, *, deproject, project, config, 
             'align_reference' if surface.get('align_to_reference_yaw',False) else 'keep_target'}}
     orientation_policy, selected_yaw = resolve_place_orientation(policy_config,scenario,float(yaw),
         reference_yaw=float(ref_yaw),initial_yaw=initial_yaw,override=orientation_override)
+    if locked_destination is not None:
+        selected_yaw = locked_destination['place_yaw_deg']
+        if top:
+            z_mm = locked_destination['landing_surface_z_mm']
+        cand_specs = cand_specs[:1]
     candidate_rotations = [selected_yaw - yaw]
 
     last_error = None
@@ -588,6 +593,8 @@ def plan_relative_place(task, detections, frame, *, deproject, project, config, 
             offset = displacement if is_self else 0.0 if top or is_initial else _center_advance_for_gap(
                 reference_poly - reference_center, offsets, cand_dir, cand_gap + margin)
             center = reference_center + cand_dir * offset
+            if locked_destination is not None:
+                center = np.asarray(locked_destination['destination_center_robot_xy_mm'], dtype=float)
             destination = offsets + center
             envelope = clearance_envelope_obb(destination, padding, margin, tcp_offset)
             lower, upper = envelope.min(axis=0), envelope.max(axis=0)  # Diagnostics only.
@@ -632,7 +639,7 @@ def plan_relative_place(task, detections, frame, *, deproject, project, config, 
                 checked_pixels, local_z_mm = _surface_clear(
                     envelope, frame, deproject, project, transform, z_mm, tolerance, config["depth"], allow_lower=top,
                     **({'exclude_footprint':target_poly,'exclude_top_z_mm':target_z_mm,
-                        'exclude_image_polygon':det.corners_px,'mask_diagnostics':mask_diagnostics} if is_self else {}))
+                        'exclude_image_polygon':det.corners_px,'mask_diagnostics':mask_diagnostics} if is_self or locked_destination is not None else {}))
                 landing_z_mm = float(local_z_mm) if (surface.get("use_local_surface_z") and not top) else float(z_mm)
                 grasp = build_top_down_plan(point, yaw, config["grasp"],
                     canonical_target=det.class_name, table_z_mm=base_table_z_mm)
@@ -717,6 +724,8 @@ def plan_relative_place(task, detections, frame, *, deproject, project, config, 
         'gap_metric': 'minimum_euclidean_polygon_distance', **chosen_plan['gap_metrics'],
         "right_axis_robot_xy": right.tolist(), "reference_center_robot_xy_mm": reference_center.tolist(),
         'direction_axis_robot_xy': cand_dir.tolist(), 'landing_surface_z_mm': landing_z_mm,
+        'expected_top_z_mm': (locked_destination['expected_top_z_mm'] if locked_destination is not None
+                             else ref_top_z_mm + target_z_mm - base_table_z_mm) if top else None,
         "local_surface_z_mm": local_z_mm, "grasp_yaw_deg": float(yaw), "reference_yaw_deg": float(ref_yaw),
         "place_yaw_deg": float(place_yaw), "orientation_policy": orientation_policy,
         'support_model_checked': False, 'support_model': support, 'object_model': object_model,
@@ -787,3 +796,50 @@ def evaluate_relative_place(plan, detections, frame, *, deproject, config, posit
             'reference_height_error_mm': reference_height_error,
             "destination_error_mm": error, "reference_motion_mm": reference_error,
             "position_tolerance_mm": tolerance, "authorizes_motion": False}
+
+
+def match_result_target(expected, instances, *, stationary_radius_mm=20.0):
+    """Exclude each unselected same-class object once, then match the moved target."""
+    candidates = [i for i in instances if i['class_name'] == expected['target_object']]
+    if any(i.get('xyz_mm') is None for i in candidates):
+        _reject('result_target_depth_unavailable')
+    candidates = list(candidates)
+    for center in expected['unselected_centers_mm']:
+        if not candidates:
+            break
+        other = min(candidates, key=lambda i: np.linalg.norm(np.asarray(i['xyz_mm'][:2]) - center))
+        if np.linalg.norm(np.asarray(other['xyz_mm'][:2]) - center) <= stationary_radius_mm:
+            candidates.remove(other)
+    if not candidates:
+        return None
+    return min(candidates, key=lambda i: np.linalg.norm(
+        np.asarray(i['xyz_mm'][:2]) - expected['destination_center_robot_xy_mm']))
+
+
+def evaluate_local_result(expected, instances, *, position_tolerance_mm=20.0,
+                          height_tolerance_mm=20.0, named_min_displacement_mm=25.0):
+    """V2's permissive local object check; this never verifies robot arrival."""
+    target = match_result_target(expected, instances)
+    named = expected['destination_type'] == 'named'
+    if target is None and not named:
+        _reject('result_target_not_observed')
+    result = {'status':'geometry_result', 'authorizes_motion':False,
+              'target_instance_id':target['instance_id'] if target else None,
+              'position_tolerance_mm':position_tolerance_mm,
+              'height_tolerance_mm':height_tolerance_mm,
+              'named_min_displacement_mm':named_min_displacement_mm}
+    if target is None:
+        return {**result, 'passed':True, 'basis':'named_target_not_observed'}
+    xy = np.asarray(target['xyz_mm'][:2])
+    displacement = float(np.linalg.norm(xy - expected['source_center_robot_xy_mm']))
+    error = float(np.linalg.norm(xy - expected['destination_center_robot_xy_mm']))
+    height_error = 0.0
+    if expected['spatial_relation'] == 'on_top_of':
+        height_error = abs(target['xyz_mm'][2] - expected['expected_top_z_mm'])
+    # Sub-micrometre rounding avoids float32 projection flipping an exact boundary.
+    passed = (round(displacement, 5) >= named_min_displacement_mm if named else
+              round(error, 5) <= position_tolerance_mm and round(height_error, 5) <= height_tolerance_mm)
+    return {**result, 'passed':bool(passed), 'destination_error_mm':error,
+            'observed_displacement_mm':displacement, 'vertical_error_mm':height_error,
+            'basis':'named_displacement' if named else 'center_and_height' if
+            expected['spatial_relation'] == 'on_top_of' else 'center'}

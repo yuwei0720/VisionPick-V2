@@ -506,7 +506,10 @@ class MyCobotController:
             self._vertical_continuation = None
         self._event("gripper", "gripper_commanded", gripper_state=state, speed=speed)
         try:
-            self.mc.set_gripper_state(state, speed)
+            result = self.mc.set_gripper_state(state, speed)
+            from numbers import Real
+            if result is False or (isinstance(result, Real) and result < 0):
+                raise RobotError(f"gripper_dispatch_rejected: {result!r}")
         except Exception as exc:
             raise RobotError(f"set_gripper_state(state={state}, speed={speed}) 失敗: {exc}") from exc
         self.sleep(wait)

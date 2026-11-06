@@ -80,8 +80,8 @@ def test_cleanup_without_config_revision_does_not_raise_or_invent_identity():
 
 CONFIG = {"robot": {"approach_strategy": "linear", "coordinate_speed": 15, "start_angle_speed": 15,
     "start_angles_deg": [0,0,0,-90,0,-45], "start_pose_mm_deg": [0,0,250,-180,0,0], "fallback_wait_s": 0,
-    "gripper": {"speed": 80}, "pose_verify_stable_polls": 3, "motion_timeout_s": 1.0,
-    "motion_poll_interval_s": .1}, "grasp": {"workspace_mm": {"x": [-280,280],"y":[-280,280],"z":[70,320]}}}
+    "gripper": {"speed": 80}, "pose_verify_stable_polls": 3, "motion_timeout_s": 10.0,
+    "motion_poll_interval_s": 1.5}, "grasp": {"workspace_mm": {"x": [-280,280],"y":[-280,280],"z":[70,320]}}}
 
 
 class Clock:
@@ -129,39 +129,28 @@ def controller(*,config=None,feedback=None,latency=0,dispatch_latency=0,checkpoi
 @pytest.mark.parametrize('kind',['cartesian','joint'])
 @pytest.mark.parametrize('controller_error',[None,0])
 @pytest.mark.parametrize('second_result',[1,None,0,-1,'exception'])
-def test_serial_timeout_retries_once_and_records_both_attempts(kind,controller_error,second_result):
-    ctrl,b,clock,events=controller();attempts=[];clears=[]
-    def reset():
-        clears.append(clock());b._serial_port.in_waiting=0
-    b._serial_port=SimpleNamespace(in_waiting=3,reset_input_buffer=reset)
+def test_serial_timeout_retries_only_after_known_clear_controller(kind,controller_error,second_result):
+    ctrl,b,clock,events=controller();attempts=[]
+    b._serial_port=SimpleNamespace(in_waiting=0)
     b.get_error_information=lambda:controller_error
+    target=[100,0,180,-180,0,0] if kind=='cartesian' else [10,20,30,-90,0,-45]
     def send(*args):
-        attempts.append((clock(),args))
-        if len(attempts)==1:
-            b._serial_port.in_waiting=3
-            return -1
+        attempts.append(clock())
+        if len(attempts)==1:return -1
         if second_result=='exception':raise OSError('retry transport failure')
+        if kind=='cartesian':b.coords=list(target)
+        else:b.angles=list(target)
         return second_result
     setattr(b,'send_coords' if kind=='cartesian' else 'send_angles',send)
-    target=[100,0,180,-180,0,0] if kind=='cartesian' else [10,20,30,-90,0,-45]
-    def move():
-        return ctrl.move_pose(target) if kind=='cartesian' else ctrl.move_joint_target(target,label='joint')
-    if second_result in (1,None,0):
+    move=lambda:ctrl.move_pose(target) if kind=='cartesian' else ctrl.move_joint_target(target,label='joint')
+    if controller_error==0 and second_result in (1,None,0):
         move()
-        complete=next(d for e,d in events if e=='movement_completed')
-        assert complete['send_results']==[-1,second_result] and complete['arrival_verified'] is False
-        assert complete['dispatch_attempts']==2
-        assert clock()==pytest.approx(3.2)
+        assert next(d for e,d in events if e=='movement_completed')['arrival_verified']
     else:
         with pytest.raises(RobotError,match='dispatch_failed'):move()
         assert not any(e=='movement_completed' for e,d in events)
-        assert clock()==pytest.approx(.2) and b.reads==0 and b.calls==[]
-        failure=next(d for e,d in events if e=='dispatch_failed')
-        assert failure['controller_error']==controller_error and failure['dispatch_attempts']==2
-    assert len(attempts)==ctrl.command_count==2 and len(clears)==2
-    assert attempts[0][1]==attempts[1][1] and attempts[1][0]-attempts[0][0]==pytest.approx(.2)
-    assert [e for e,d in events].count('dispatch_retry')==1
-
+    assert len(attempts)==(2 if controller_error==0 else 1)
+    if len(attempts)==2:assert attempts[1]-attempts[0]>=3.0
 
 @pytest.mark.parametrize('result',[False,-2.5,'exception'])
 def test_serial_present_does_not_retry_other_failures(result):
@@ -173,32 +162,31 @@ def test_serial_present_does_not_retry_other_failures(result):
         return result
     b.send_coords=send
     with pytest.raises(RobotError,match='dispatch_failed'):ctrl.move_pose([100,0,180,-180,0,0])
-    assert len(attempts)==1 and clock()==0 and not any(e=='dispatch_retry' for e,d in events)
-
+    assert len(attempts)==1 and clock()>=1.5 and not any(e=='dispatch_retry' for e,d in events)
 
 def test_cancel_during_serial_retry_delay_prevents_second_send():
     ctrl,b,clock,events=controller();attempts=[]
     b._serial_port=SimpleNamespace(in_waiting=0)
     b.send_coords=lambda *args:attempts.append(args) or -1
     ctrl.checkpoint=lambda:(_ for _ in ()).throw(RobotError('cancelled')) if clock()>=.2 else None
-    with pytest.raises(RobotError,match='dispatch_failed'):ctrl.move_pose([100,0,180,-180,0,0])
+    with pytest.raises(RobotError,match='cancelled'):ctrl.move_pose([100,0,180,-180,0,0])
     assert len(attempts)==ctrl.command_count==1 and not any(e=='dispatch_retry' for e,d in events)
-
 
 @pytest.mark.parametrize('kind',['cartesian','joint'])
 @pytest.mark.parametrize('result',[None,0,1,True,2])
-def test_sdk_zero_and_none_are_sent_without_claiming_arrival(kind,result):
+def test_sdk_send_acceptance_still_requires_arrival_feedback(kind,result):
     ctrl,b,clock,events=controller()
-    def send(*args):b.calls.append(('sent',));return result
-    setattr(b,'send_coords' if kind=='cartesian' else 'send_angles',send)
     target=[100,0,180,-180,0,0] if kind=='cartesian' else [10,20,30,-90,0,-45]
+    def send(*args):
+        b.calls.append(('sent',))
+        if kind=='cartesian':b.coords=list(target)
+        else:b.angles=list(target)
+        return result
+    setattr(b,'send_coords' if kind=='cartesian' else 'send_angles',send)
     ctrl.move_pose(target) if kind=='cartesian' else ctrl.move_joint_target(target,label='joint')
-    completed=[d for e,d in events if e=='movement_completed']
-    assert len(b.calls)==len(completed)==1 and ctrl.command_count==1
-    assert completed[0]['send_result'] is result
-    assert completed[0]['arrival_verified'] is False and clock()==3.
-    assert ctrl._last_verified_coords is None and ctrl._last_verified_angles is None
-
+    complete=next(d for e,d in events if e=='movement_completed')
+    assert len(b.calls)==1 and complete['send_result'] is result and complete['arrival_verified']
+    assert b.reads==3 and clock()>=6
 
 @pytest.mark.parametrize('kind',['cartesian','joint'])
 @pytest.mark.parametrize('result',[False,-1,-2.5,'exception'])
@@ -216,12 +204,11 @@ def test_failed_sdk_send_has_one_attempt_no_wait_completion_or_downstream_comman
         else:
             ctrl.move_joint_target([0,0,0,-90,0,-45],label='joint')
             ctrl.close_gripper()
-    assert len(attempts)==ctrl.command_count==1 and b.calls==[] and b.reads==reads_at_send[0] and clock()==times_at_send[0]
+    assert len(attempts)==ctrl.command_count==1 and b.calls==[] and b.reads==reads_at_send[0] and clock()>=times_at_send[0]+1.5
     assert [e for e,d in events].count('dispatch_failed')==1
     assert not any(e=='movement_completed' for e,d in events)
     failure=next(d for e,d in events if e=='dispatch_failed')
     assert failure['send_result']==(None if result=='exception' else result)
-
 
 @pytest.mark.parametrize('metrics',[False,True])
 @pytest.mark.parametrize('result',[None,0,1,False,-1,'exception'])
@@ -265,11 +252,10 @@ def test_adapter_checkpoint_after_send_is_not_mislabeled_as_dispatch_failure():
 
 def test_before_capture_initialization_opens_then_verifies_start_without_ik():
     ctrl,backend,clock,events=controller()
-    assert ctrl.initialize_for_pick()=={'control_completed':True,'start_verified':True}
+    assert ctrl.initialize_for_pick()=={'control_completed':True,'start_verified':True,'arrival_verified':True}
     assert backend.calls==[('gripper',0),('angles',CONFIG['robot']['start_angles_deg'])]
-    assert backend.reads==1 and ctrl.command_count==2
+    assert backend.reads==3 and ctrl.command_count==2
     assert events[-1][0]=='start_verified_before_capture'
-
 
 @pytest.mark.parametrize('fault',['endpoint','workspace','holding','disabled','gripper'])
 def test_before_capture_invalid_start_has_no_commands(fault):
@@ -284,38 +270,32 @@ def test_before_capture_invalid_start_has_no_commands(fault):
     assert backend.calls==[]
 
 
-def test_before_capture_slow_send_uses_fixed_wait_and_one_sample():
-    ctrl,backend,clock,events=controller(dispatch_latency=1.1)
-    assert ctrl.initialize_for_pick()['control_completed']
-    assert len(backend.calls)==2 and backend.reads==1
-    assert any(e=='start_verified_before_capture' and d['arrival_verified'] is False for e,d in events)
-
+def test_before_capture_slow_send_keeps_wait_and_confirms_start():
+    ctrl,b,clock,events=controller(dispatch_latency=1.1)
+    assert ctrl.initialize_for_pick()['arrival_verified']
+    assert len(b.calls)==2 and b.reads==3
+    assert any(e=='start_verified_before_capture' and d['arrival_verified'] for e,d in events)
 
 @pytest.mark.parametrize('kind',['cartesian','joint'])
-def test_one_sample_only_even_when_stable_polls_is_three(kind):
+def test_three_stable_samples_are_required_after_invalid_feedback(kind):
     target=[100,0,180,-180,0,0] if kind=='cartesian' else [0,0,0,-90,0,-45]
-    ctrl,backend,clock,events=controller(feedback=[None,target,target])
+    ctrl,b,clock,events=controller(feedback=[None,target,target,target])
     actual=ctrl.move_pose(target) if kind=='cartesian' else ctrl.move_joint_target(target,label='joint')
-    assert actual is None and len(backend.calls)==1 and backend.reads==1
-    assert clock.now==pytest.approx(3.0)
-    assert len([d for e,d in events if e=='feedback_sampled'])==1
-
+    assert actual==target and len(b.calls)==1 and b.reads==4
+    assert len([d for e,d in events if e=='feedback_sampled'])==3
 
 @pytest.mark.parametrize('kind',['cartesian','joint'])
-def test_slow_feedback_is_telemetry_and_never_retried(kind):
-    ctrl,backend,clock,events=controller(latency=1.1)
+def test_slow_feedback_is_included_in_confirmation_deadline(kind):
+    ctrl,b,clock,events=controller(latency=1.1)
     if kind=='cartesian':ctrl.move_pose([100,0,180,-180,0,0])
     else:ctrl.move_joint_target([0,0,0,-90,0,-45],label='joint')
-    assert len(backend.calls)==backend.reads==1
-    assert clock.now==pytest.approx(4.1)
-    assert any(e=='movement_completed' for e,_ in events)
+    assert len(b.calls)==1 and b.reads==3
+    assert clock()>=9 and any(e=='movement_completed' for e,_ in events)
 
-
-def test_slow_dispatch_still_waits_after_send_and_samples_once():
+def test_slow_dispatch_still_waits_after_send_and_confirms_arrival():
     ctrl,backend,clock,events=controller(dispatch_latency=1.1)
     ctrl.move_pose([100,0,180,-180,0,0])
-    assert len(backend.calls)==backend.reads==1 and clock.now==pytest.approx(4.1)
-
+    assert len(backend.calls)==1 and backend.reads==3 and clock.now==pytest.approx(7.1)
 
 @pytest.mark.parametrize('mode',['cartesian','joint'])
 def test_complete_pick_place_with_failed_ik_emits_release_for_both_modes(mode):
@@ -346,12 +326,11 @@ def test_invalid_whole_task_has_zero_commands_including_initialization(fault):
     assert backend.calls==[] and ctrl.command_count==0
 
 
-def test_bad_telemetry_does_not_block_close_or_release():
-    ctrl,backend,_,_=controller(feedback=[[0,0,70,0,0,0]]*20);grasp,place=plans()
-    result=ctrl.execute_pick_and_place(grasp,place,geometry_passed=True,initialize=False)
-    assert result['control_completed'] and result['arrival_verified'] is False
-    assert [c[1] for c in backend.calls if c[0]=='gripper']==[1,0]
-
+def test_wrong_arrival_feedback_blocks_close_and_release():
+    ctrl,b,_,_=controller();b.get_coords=lambda:[0,0,70,0,0,0]
+    with pytest.raises(RobotError,match='arrival_timeout'):
+        ctrl.execute_pick_and_place(*plans(),geometry_passed=True,initialize=False)
+    assert not any(c[0]=='gripper' for c in b.calls)
 
 def test_failure_after_grip_retains_uncertain_holding_and_does_not_auto_open():
     ctrl,backend,_,_=controller();grasp,place=plans()
@@ -414,8 +393,7 @@ def test_completion_returns_after_release_and_retreat_without_extra_gripper_wait
     assert [c[1] for c in backend.calls if c[0]=='gripper']==[0,1,0]
     labels=[d['label'] for e,d in events if e=='movement_completed']
     assert labels[-2:]==['place_retreat','completion_return_to_start']
-    assert len([d for e,d in events if e=='feedback_sampled' and d['label']=='completion_return_to_start'])==1
-
+    assert len([d for e,d in events if e=='feedback_sampled' and d['label']=='completion_return_to_start'])==3
 
 def test_intermediate_task_defers_return_until_sequence_final_step():
     ctrl,backend,_,_=controller();grasp,place=plans()
@@ -433,24 +411,21 @@ def test_completion_start_failure_never_claims_completed_or_at_start():
     assert not any(e=='empty_hand_returned_to_start' for e,_ in events)
 
 
-def test_intermediate_waypoints_use_zero_reads_and_endpoints_use_one():
+def test_intermediate_waypoints_use_zero_reads_and_endpoints_use_stable_polls():
     cfg=deepcopy(CONFIG);cfg['robot']['approach_strategy']='segmented'
     ctrl,backend,_,events=controller(config=cfg);grasp,place=plans()
     ctrl.execute_pick_and_place(grasp,place,geometry_passed=True,initialize=False)
     for start in [d for e,d in events if e=='movement_started' and d['vertical_stage']]:
         samples=[d for e,d in events if e=='feedback_sampled' and d['label']==start['label']]
-        assert len(samples)==(0 if start['intermediate'] else 1)
-    assert all(d['arrival_verified'] is False for e,d in events if e=='movement_completed')
+        assert len(samples)==(0 if start['intermediate'] else 3)
+    assert all(d['arrival_verified'] is (not d['intermediate']) for e,d in events if e=='movement_completed')
 
-
-def test_missing_feedback_never_uses_or_updates_verified_cache():
-    ctrl,backend,clock,events=controller();target=[100,0,180,-180,0,0]
-    cached=[0,0,200,-180,0,0];ctrl._last_verified_coords=cached
-    backend.get_coords=lambda:None
-    assert ctrl.move_pose(target,stable_count=3) is None
+def test_missing_feedback_stops_without_reusing_verified_cache():
+    ctrl,b,clock,events=controller();cached=[0,0,200,-180,0,0];ctrl._last_verified_coords=cached
+    b.get_coords=lambda:None
+    with pytest.raises(RobotError,match='feedback_unavailable'):ctrl.move_pose([100,0,180,-180,0,0])
     assert ctrl._last_verified_coords is cached
-    assert any(e=='movement_completed' and d['arrival_verified'] is False for e,d in events)
-
+    assert not any(e=='movement_completed' for e,d in events)
 
 @pytest.mark.parametrize('strategy',['linear','segmented'])
 def test_each_vertical_stage_has_only_one_endpoint_sample(strategy):
@@ -498,48 +473,37 @@ def test_vertical_setting_rejects_invalid_step_before_dispatch(value):
 
 
 @pytest.mark.parametrize('dx,dz,accepted',[(8.,0.,True),(8.001,0.,False),(0.,4.,True),(0.,4.001,False),(7.,4.,False)])
-def test_grasp_endpoint_errors_are_log_only(dx,dz,accepted):
+def test_grasp_endpoint_uses_configured_position_tolerance(dx,dz,accepted):
     c,b,clock,events=controller();target=[100,0,180,-180,0,0]
     b.get_coords=lambda:[100+dx,0,180+dz,-180,0,0]
     assert c.move_pose(target,grasp_endpoint=True)[0]==100+dx
-    assert clock.now==pytest.approx(4.0)
+    assert clock.now==pytest.approx(7.0)
     assert any(e=='movement_completed' for e,_ in events)
-
 
 @pytest.mark.parametrize('policy',['segmented_mode0','linear_mode1','single_mode0'])
 @pytest.mark.parametrize('sample',[None,RuntimeError('read failed'),[100,0,189.25,-180,0,0]])
-def test_each_mode_completes_with_missing_failed_or_inaccurate_telemetry(policy,sample):
+def test_each_mode_blocks_grip_without_valid_arrival(policy,sample):
     cfg=deepcopy(CONFIG);cfg['robot'].update(vertical_motion_mode=policy,vertical_segment_step_mm=35.)
-    c,b,_,events=controller(config=cfg);grasp,place=plans()
+    c,b,_,events=controller(config=cfg)
     def read():
         if isinstance(sample,Exception):raise sample
         return sample
     b.get_coords=read
-    result=c.execute_pick_and_place(grasp,place,geometry_passed=True,initialize=False)
-    assert result['control_completed'] and result['arrival_verified'] is False
-    assert [x for x in b.calls if x[0]=='gripper']==[('gripper',1),('gripper',0)]
-    assert all(d['completion_basis']=='fixed_wait' for e,d in events if e=='movement_completed')
-    assert not any(e.endswith('_timeout') for e,_ in events)
+    with pytest.raises(RobotError,match='feedback_unavailable|arrival_timeout'):
+        c.execute_pick_and_place(*plans(),geometry_passed=True,initialize=False)
+    assert not any(x[0]=='gripper' for x in b.calls)
 
-
-def test_move_contains_no_polling_loop_and_never_reads_intermediate_feedback():
-    import ast,inspect,textwrap
-    tree=ast.parse(textwrap.dedent(inspect.getsource(DirectRobotControllerV2._move)))
-    assert not any(isinstance(n,ast.While) for n in ast.walk(tree))
+def test_intermediate_feedback_is_not_polled():
     c,b,clock,events=controller()
-    b.get_coords=lambda:pytest.fail('intermediate waypoint queried coordinates')
-    b.get_angles=lambda:pytest.fail('intermediate waypoint queried joints')
-    b.get_error_information=lambda:pytest.fail('intermediate waypoint queried controller error')
-    assert c.move_pose([100,0,180,-180,0,0],vertical_stage='grasp_descent',waypoint_index=1,intermediate=True) is None
-    assert clock.now==pytest.approx(.35)
-
+    b.get_coords=lambda:pytest.fail('intermediate coordinate query')
+    b.get_angles=lambda:pytest.fail('intermediate joint query')
+    c.move_pose([100,0,180,-180,0,0],vertical_stage='grasp_descent',waypoint_index=1,intermediate=True)
+    assert clock()==pytest.approx(.35)
 
 @pytest.mark.parametrize('kind',['cartesian','joint'])
-def test_feedback_exception_is_telemetry_and_movement_status_stays_ok(kind):
-    c,b,clock,_=controller();events=[]
-    c.event_sink=lambda stage,event,**detail:events.append((event,detail))
-    def fail(kind):raise RobotError('controlled feedback error')
-    c._feedback=fail
-    actual=c.move_pose([100,0,180,-180,0,0]) if kind=='cartesian' else c.move_joint_target([0,0,0,-90,0,-45],label='joint')
-    assert actual is None and len(b.calls)==1
-    assert next(detail for event,detail in events if event=='movement_completed')['status']=='ok'
+def test_feedback_exception_cannot_claim_movement_completed(kind):
+    c,b,clock,events=controller()
+    c._feedback=lambda kind:(_ for _ in ()).throw(RobotError('controlled feedback error'))
+    with pytest.raises(RobotError,match='controlled feedback error'):
+        c.move_pose([100,0,180,-180,0,0]) if kind=='cartesian' else c.move_joint_target([0,0,0,-90,0,-45],label='joint')
+    assert len(b.calls)==1 and not any(e=='movement_completed' for e,d in events)

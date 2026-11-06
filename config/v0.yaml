@@ -184,10 +184,10 @@ robot:
   vertical_motion_mode: "segmented_mode0"
   vertical_segment_step_mm: 35
   motion_timeout_s: 25
-  motion_poll_interval_s: 0.5
+  motion_poll_interval_s: 1.5
   pose_verify_position_tolerance_mm: 20.0
   pose_verify_orientation_tolerance_deg: 8.0
-  pose_verify_stable_polls: 1
+  pose_verify_stable_polls: 2
   fallback_wait_s: 3
   vertical_endpoint_wait_s: 4.0    # 垂直終點等待 (抓取下降/抬升/放置下降/退避到位)
   transfer_wait_s: 3.0             # 跨區等待 (長距離關節或座標跨區移動)

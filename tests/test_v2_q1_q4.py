@@ -203,7 +203,9 @@ def missing_second_step(h,role='target'):
         obs=observe(run,step,**kwargs)
         if step==2 and control['missing'] and not kwargs.get('semantic_only'):
             name=h.tasks[1][role]
-            instances=tuple(i for i in obs.instances if i['class_name']!=name)
+            # Keep measured geometry for the previous result check; deny the next role.
+            key='eligible' if role=='target' else 'reference_eligible'
+            instances=tuple(i|{key:False} if i['class_name']==name else i for i in obs.instances)
             return replace(obs,instances=instances,display=obs.display|{'instances':list(instances)})
         return obs
     h.runtime._observe=capture

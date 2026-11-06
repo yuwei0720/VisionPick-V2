@@ -895,12 +895,15 @@ class ConsoleRuntimeV2:
                 if self._thread and self._thread.is_alive(): raise ValueError('v2_worker_busy')
                 self._preflight(run)
                 run['pending'].confirm(**payload)
+                from integration.relative_placement import evaluate_local_result
                 seq = TaskSequenceV2(run['pending'], run_id=run_id, initialization_policy='each_task',
                     observe=lambda step: self._observe(run, step), prepare=lambda *a: self._prepare(run, *a),
                     execute=lambda *a, **k: self._execute(run, *a, **k),
                     step_recovery_enabled=True,
                     persist_boundary=lambda: self._save(run),
                     initialize_before_observe=lambda step, **k: self._initialize(run, step, **k),
+                    check_result=lambda expected, observed: evaluate_local_result(expected, observed.instances),
+                    observe_completion=lambda **options: self._capture_completion(run, run['sequence'].snapshot(), **options),
                     max_scene_age_ms=run['config'].get('scene', {}).get('max_age_ms', 30000))
                 run['sequence'] = seq
                 seq.begin(version=payload['version'])
@@ -1073,7 +1076,7 @@ class ConsoleRuntimeV2:
             detections, frame, deproject, project, geometry_cfg, surface = self.scene_factory(step, cfg, run['mode'])
         elif run['mode'] == 'offline':
             from .simulation import synthetic_scene
-            case = self._demo_case()
+            case = run.setdefault('offline_scene', self._demo_case())
             detections, frame, deproject, project = synthetic_scene(case)
             geometry_cfg, surface = case['config'], case['surface']
         else:
@@ -1502,6 +1505,7 @@ class ConsoleRuntimeV2:
                 self_displacement_mm=task.get('displacement_mm'),
                 orientation_override=orientation_override,
                 exact_gap=task.get('gap_mm') is not None,preview_scene=ctx.get('preview_scene'),
+                locked_destination=selected.get('locked_destination'),
                 reserved_regions=self._swap_reserved_regions(run,task,observation,cfg,surface,
                     step_id=step_id,orientation_override=orientation_override))
             grasp = GraspPlan(**{k:tuple(v) for k,v in geometry['source_grasp_plan'].items()})
@@ -1591,6 +1595,18 @@ class ConsoleRuntimeV2:
                     settings.get('placement_orientation_overrides',{}).get(str(step)))
         prepared = self._plan_placement(run,task,observation,selected,orientation_override=override)
         grasp,place,geometry = prepared['grasp'],prepared['place'],prepared['geometry']
+        source = next(i for i in observation.instances if i['instance_id'] == selected['target'])
+        prepared['result_expectation'] = {
+            'target_object':task['target'], 'destination_type':task['destination_type'],
+            'spatial_relation':task['relation'],
+            'source_center_robot_xy_mm':source['xyz_mm'][:2],
+            'destination_center_robot_xy_mm':geometry['destination_center_robot_xy_mm'],
+            'unselected_centers_mm':[i['xyz_mm'][:2] for i in observation.instances
+                if i['class_name'] == task['target'] and i['instance_id'] != selected['target']],
+            'expected_top_z_mm':geometry.get('expected_top_z_mm'),
+            'place_yaw_deg':geometry['place_yaw_deg'],
+            'landing_surface_z_mm':geometry['landing_surface_z_mm'],
+        }
         run['controller']._program(grasp,place,False)  # Endpoint/parameter validation, no dispatch or solver.
         atomic_json(self._path(run['id'])/f'{observation.frame_id}.geometry.json',geometry)
         if any(p.get('reason') in {'ambiguous_object_instances','object_not_detected'}
@@ -1608,8 +1624,30 @@ class ConsoleRuntimeV2:
         try:
             sequence = run['sequence'].snapshot() if run.get('sequence') else None
             final_step = sequence is None or sequence['step_id'] == len(sequence['steps'])
-            return ctrl.execute_pick_and_place(prepared['grasp'],prepared['place'],geometry_passed=True,
-                                              initialize=False,return_to_start=final_step)
+            result = ctrl.execute_pick_and_place(prepared['grasp'],prepared['place'],geometry_passed=True,
+                                                 initialize=False,return_to_start=final_step)
+            if run['mode'] == 'offline' and self.scene_factory is None:
+                # Advance only the built-in synthetic scene; real observations always come from the camera.
+                import cv2
+                import numpy as np
+                from integration.relative_placement import project_robot_points_mm
+                observed = run['observation']
+                selected = sequence['steps'][sequence['step_id']-1]['selected']['target']
+                source = next(i for i in observed.instances if i['instance_id'] == selected)
+                geometry = prepared['geometry']
+                z = geometry.get('expected_top_z_mm')
+                if z is None: z = source['xyz_mm'][2]
+                points = np.column_stack((geometry['destination_footprint_robot_xy_mm'], [z]*4))
+                cfg, intrinsics = observed.payload['config'], observed.payload['frame'].intrinsics
+                pixels = project_robot_points_mm(points, cfg, intrinsics)
+                center, size, angle = cv2.minAreaRect(np.asarray(pixels, dtype=np.float32))
+                if size[0] < size[1]:
+                    size = (size[1], size[0]);angle += 90
+                inv = np.linalg.inv(np.asarray(cfg['calibration']['T_robot_from_camera']))
+                depth = float((inv @ np.array([*geometry['destination_center_robot_xy_mm'], z, 1000.]))[2]/1000.)
+                run['offline_scene']['objects'][source['index']].update(
+                    center_uv=list(center), size_px=list(size), angle_deg=angle, depth_m=depth)
+            return result
         finally:
             if run['mode']=='real':
                 self._write_controller_state({'holding_uncertain':ctrl.gripper_holding_uncertain,
@@ -1625,10 +1663,15 @@ class ConsoleRuntimeV2:
                 self._save(run)
             if state['status']!='running': break
 
-    def _capture_completion(self, run, state):
+    def _capture_completion(self, run, state, *, force=False):
         """Record the post-return scene once, without dispatching another move."""
-        if run.get('completion_capture') or run['cancelled']: return
-        run['completion_capture'] = {'status':'capturing','authorizes_motion':False}
+        if run['cancelled']: return
+        source_frame = state['steps'][-1].get('frame_id')
+        previous = run.get('completion_capture') or {}
+        if not force and previous.get('source_frame_id') == source_frame and previous.get('status') == 'captured':
+            return run['completion_observation']
+        run['completion_capture'] = {'status':'capturing','authorizes_motion':False,
+                                     'source_frame_id':source_frame}
         self._save(run)
         try:
             ctrl = run.get('controller')
@@ -1637,22 +1680,27 @@ class ConsoleRuntimeV2:
             ctrl.sleep(run['config']['robot'].get('start_settle_s',1.5))
             if run['cancelled']:
                 run['completion_capture']['status'] = 'cancelled'
+                run['sequence'].cancel()
                 return
             observed = self._observe(run, state['step_id'], semantic_only=True)
             if run['cancelled']:
                 run['completion_capture']['status'] = 'cancelled'
+                run['sequence'].cancel()
                 self._visible_scene = None
                 return
             run['final_preview'] = observed.display
+            run['completion_observation'] = observed
             # This image documents completion; a new task obtains its own scene.
             self._visible_scene = None
             run['completion_capture'].update(status='captured',frame_id=observed.frame_id,
                 captured_at_unix_ms=observed.captured_at_unix_ms)
             self._event(run,'perception','completion_scene_observed',frame_id=observed.frame_id)
+            return observed
         except Exception as exc:
             self._visible_scene = None
             run['completion_capture'].update(status='failed',reason=str(exc))
             self._event(run,'perception','completion_scene_capture_failed',reason=str(exc))
+            raise
 
     def _cleanup(self, run):
         errors = []

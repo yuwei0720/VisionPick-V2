@@ -28,6 +28,30 @@ def task(relation='right_of', target='eraser', reference='pen'):
     return {'target':target,'destination_type':'relative','destination_name':None,'reference':reference,'relation':relation}
 
 
+def move_fixture(h, run, prepared):
+    """Render the commanded object endpoint into the next controlled RGB-D frame."""
+    import cv2
+    import numpy as np
+    from integration.relative_placement import project_robot_points_mm
+    step = run['sequence'].snapshot()
+    target_id = step['steps'][step['step_id']-1]['selected']['target']
+    source = next(i for i in run['observation'].instances if i['instance_id'] == target_id)
+    obj = h.case['objects'][source['index']]
+    geometry = prepared['geometry']
+    z = geometry.get('expected_top_z_mm')
+    if z is None:
+        z = source['xyz_mm'][2]
+    points = np.column_stack((geometry['destination_footprint_robot_xy_mm'], [z]*4))
+    ctx = run['observation'].payload
+    pixels = project_robot_points_mm(points, ctx['config'], ctx['frame'].intrinsics)
+    center, size, angle = cv2.minAreaRect(np.asarray(pixels, dtype=np.float32))
+    if size[0] < size[1]:
+        size = (size[1], size[0]);angle += 90
+    obj.update(center_uv=list(center), size_px=list(size), angle_deg=angle)
+    inv = np.linalg.inv(np.asarray(ctx['config']['calibration']['T_robot_from_camera']))
+    obj['depth_m'] = float((inv @ np.array([*geometry['destination_center_robot_xy_mm'], z, 1000.]))[2]/1000.)
+
+
 class Backend:
     def __init__(self):
         self.coords=[0,0,150,-180,0,0]; self.angles=[0]*6; self.calls=[]
@@ -49,7 +73,7 @@ class Harness:
         self.cfg['scene']['workspace_view_rotation_deg']=rotation
         self.cfg['robot']={'start_angles_deg':[0,0,0,-90,0,-45],'start_pose_mm_deg':[0,0,150,-180,0,0],
             'coordinate_speed':15,'start_angle_speed':15,'approach_strategy':'linear','fallback_wait_s':0,
-            'gripper':{'speed':80},'motion_poll_interval_s':.25,'motion_timeout_s':1}
+            'gripper':{'speed':80},'motion_poll_interval_s':1.5,'motion_timeout_s':10}
         for name in ['tools.json','world_entities.json','tests/data/relative_place_s3_demo.json']:
             dst=root/name; dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,dst)
         self.station={'profile_id':'station1','profile_key':'right','display_name':'右盒子','aliases':['收納區'],
@@ -81,6 +105,12 @@ class Harness:
             ctrl.initialize_for_pick=init
             return ctrl
         self.runtime=ConsoleRuntimeV2(self.service,semantic_parser=parse,scene_factory=scene,controller_factory=controller)
+        execute = self.runtime._execute
+        def move_scene(run, prepared, **kwargs):
+            result = execute(run, prepared, **kwargs)
+            move_fixture(self, run, prepared)
+            return result
+        self.runtime._execute = move_scene
         self.server=create_server(self.service,port=0,v2_runtime=self.runtime)
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True);self.thread.start()
         self.url=f'http://127.0.0.1:{self.server.server_address[1]}'
@@ -283,7 +313,7 @@ def test_named_station_source_controls_identical_preview_and_execution_checks(fa
     if not taught:assert overlay['reason']==expected
     assert h.confirm()[0]==200
     state=h.wait('completed','failed')
-    assert state['status']==('completed' if taught else 'failed'),state['sequence']
+    assert state['status']==('completed' if taught and defect!='depth_hole' else 'failed'),state['sequence']
     if taught:
         path=next((h.root/'runs/v2'/h.run_id).glob('*.geometry.json'))
         geometry=json.loads(path.read_text(encoding='utf-8'))
@@ -684,7 +714,7 @@ def test_completion_capture_failure_retains_last_frame_without_repeating_motion(
         if kwargs.get('semantic_only'):raise RuntimeError('controlled_final_capture_failure')
         return capture(run,step,**kwargs)
     h.runtime._observe=observe;h.confirm();s=h.wait('completed','failed')
-    assert s['status']=='completed' and s['final_preview'] is None
+    assert s['status']=='failed' and s['pending']['status']=='failed' and s['final_preview'] is None
     assert s['completion_capture']['status']=='failed'
     assert s['completion_capture']['reason']=='controlled_final_capture_failure'
     assert s['preview']['frame_id']==s['sequence']['display']['frame_id']==s['sequence']['steps'][0]['frame_id']
@@ -703,3 +733,223 @@ def test_stop_during_completion_settle_prevents_new_capture(factory):
     h.runtime._execute=stop_after_return;h.confirm();s=h.wait('completed','cancelled','failed')
     assert s['completion_capture']['status']=='cancelled' and s['final_preview'] is None
     assert h.order==[('start',1),('capture',1)]
+
+
+@pytest.mark.parametrize('count',[1,2])
+@pytest.mark.parametrize('second_succeeds',[False,True])
+def test_partial_self_move_retries_once_at_frozen_endpoint_and_reuses_captures(factory,count,second_succeeds):
+    move=task()|{'destination_type':'self_relative','reference':None,'displacement_mm':40}
+    h=factory(tasks=[move]+[task() for _ in range(count-1)])
+    execute=h.runtime._execute;attempts=[]
+    def partial(run,prepared,**kwargs):
+        step=run['sequence'].snapshot()['step_id']
+        before=list(h.case['objects'][1]['center_uv'])
+        result=execute(run,prepared,**kwargs)
+        if step==1:
+            attempts.append(deepcopy(prepared['geometry']))
+            if len(attempts)==1:
+                h.case['objects'][1]['center_uv']=[a+.375*(b-a) for a,b in zip(before,h.case['objects'][1]['center_uv'])]
+            elif not second_succeeds:
+                h.case['objects'][1]['center_uv']=before
+        return result
+    h.runtime._execute=partial;h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']==('completed' if second_succeeds else 'failed'),s['sequence']
+    assert len(attempts)==2 and attempts[0]['destination_center_robot_xy_mm']==attempts[1]['destination_center_robot_xy_mm']
+    assert attempts[0]['source_grasp_plan']!=attempts[1]['source_grasp_plan']
+    first=s['sequence']['steps'][0]
+    assert first['retry_count']==1 and first['local_result_check']['passed'] is second_succeeds
+    assert len(h.calls)==1 and not s['outcome_verified']
+    assert len([x for x in h.order if x[0]=='capture'])==(3 if count==1 else 4 if second_succeeds else 3)
+    if second_succeeds:
+        assert s['final_preview']['frame_id']==s['completion_capture']['frame_id']
+        assert s['pending']['status']=='completed'
+
+
+def test_same_class_retry_keeps_bystander_and_does_not_ask_for_selection_again(factory):
+    move=task()|{'destination_type':'self_relative','reference':None,'displacement_mm':40}
+    h=factory(tasks=[move]);h.case['objects']=duplicates(h)
+    bystander=deepcopy(h.case['objects'][2]);execute=h.runtime._execute;attempts=[]
+    def miss_once(run,prepared,**kwargs):
+        before=list(h.case['objects'][1]['center_uv']);attempts.append(prepared['frame_id'])
+        result=execute(run,prepared,**kwargs)
+        if len(attempts)==1:h.case['objects'][1]['center_uv']=before
+        return result
+    h.runtime._execute=miss_once;h.create();h.confirm();s=h.wait('waiting_instance')
+    q=s['sequence']['question'];chosen=next(i for i in q['choices'] if i['instance_id'].endswith(':1'))
+    h.action('select',{k:q[k] for k in ('run_id','step_id','frame_id','plan_version','role')}|{'instance_id':chosen['instance_id']})
+    s=h.wait('completed','failed','waiting_instance')
+    assert s['status']=='completed',s['sequence']
+    assert len(attempts)==2 and attempts[0]!=attempts[1]
+    assert h.case['objects'][2]==bystander
+    assert sum(e['event']=='instance_selected' for e in s['sequence']['history'])==1
+
+
+def fail_motion_once(h, stage, *, error_code=0, fail_recovery=False):
+    factory=h.runtime.controller_factory;failures=[];active=[]
+    execute=h.runtime._execute
+    def executing(run,prepared,**kwargs):
+        active[:]=[run,prepared]
+        return execute(run,prepared,**kwargs)
+    h.runtime._execute=executing
+    def controller(*args):
+        ctrl=factory(*args);move=ctrl._move
+        def fail(kind,target,**kwargs):
+            label=kwargs['label']
+            trigger=(not failures and label.startswith(stage) or
+                     fail_recovery and failures and label=='initialization_before_capture')
+            if not trigger:return move(kind,target,**kwargs)
+            if label.startswith('place_retreat'):
+                move_fixture(h,*active)  # Release already occurred before the failing retreat.
+            failures.append(label);key='send_angles' if kind=='joint' else 'send_coords'
+            send=getattr(ctrl.mc,key);ctrl.mc.get_error_information=lambda:error_code
+            setattr(ctrl.mc,key,lambda *a:False)
+            try:return move(kind,target,**kwargs)
+            finally:setattr(ctrl.mc,key,send)
+        ctrl._move=fail
+        return ctrl
+    h.runtime.controller_factory=controller
+    return failures
+
+
+@pytest.mark.parametrize('stage,code,status,retries',[
+    ('pick_pregrasp',0,'completed',1),
+    ('grasp_descent',32,'completed',1),
+    ('grasp_lift',0,'failed',0),
+    ('place_retreat',0,'completed',0),
+    ('completion_return_to_start',0,'failed',0),
+    ('pick_pregrasp',16,'failed',0),
+])
+def test_motion_recovery_respects_gripper_phase_and_collision_stop(factory,stage,code,status,retries):
+    h=factory();failures=fail_motion_once(h,stage,error_code=code)
+    h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']==status,s['sequence']
+    assert len(failures)==1 and s['sequence']['steps'][0].get('retry_count',0)==retries
+    assert len(h.calls)==1
+    if stage=='grasp_lift':
+        assert not any(e['event']=='object_released_at_place' for e in s['events'])
+        assert len([x for x in h.order if x[0]=='start'])==1
+    if stage=='place_retreat':
+        assert s['sequence']['steps'][0]['local_result_check']['passed']
+        assert sum(e['event']=='object_released_at_place' for e in s['events'])==1
+
+
+def test_recovery_start_failure_stops_without_second_recovery_or_capture(factory):
+    h=factory();failures=fail_motion_once(h,'pick_pregrasp',fail_recovery=True)
+    h.create();h.confirm();s=h.wait('failed')
+    assert failures==['pick_pregrasp','initialization_before_capture']
+    assert h.order==[('start',1),('capture',1),('start',2)]
+    assert not any(e['event']=='object_released_at_place' for e in s['events'])
+
+
+def test_motion_failure_and_bad_result_share_one_retry_budget(factory):
+    h=factory();fail_motion_once(h,'pick_pregrasp');execute=h.runtime._execute;attempts=[]
+    def no_move(run,prepared,**kwargs):
+        attempts.append(prepared['frame_id']);before=deepcopy(h.case['objects'])
+        result=execute(run,prepared,**kwargs);h.case['objects']=before
+        return result
+    h.runtime._execute=no_move;h.create();h.confirm();s=h.wait('failed')
+    assert len(attempts)==2 and s['sequence']['steps'][0]['retry_count']==1
+    assert 'step_retry_exhausted' in s['sequence']['error']['reason']
+    assert sum(e['event']=='step_retry_scheduled' for e in s['sequence']['history'])==1
+
+
+@pytest.mark.parametrize('outcome',['disappeared','stationary'])
+def test_named_local_rule_accepts_disappearance_but_retries_stationary_target(factory,outcome):
+    named=task()|{'destination_type':'named','destination_name':'右盒子','reference':None,'relation':None}
+    h=factory(tasks=[named]);execute=h.runtime._execute;attempts=[]
+    def result_scene(run,prepared,**kwargs):
+        before=deepcopy(h.case['objects']);attempts.append(prepared['frame_id'])
+        result=execute(run,prepared,**kwargs)
+        h.case['objects']=[o for o in before if o['class_name']!='eraser'] if outcome=='disappeared' else before
+        return result
+    h.runtime._execute=result_scene;h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']==('completed' if outcome=='disappeared' else 'failed')
+    assert len(attempts)==(1 if outcome=='disappeared' else 2)
+    if outcome=='disappeared':
+        assert s['sequence']['steps'][0]['local_result_check']['basis']=='named_target_not_observed'
+
+
+def test_short_self_displacement_still_accepts_no_motion_within_tolerance(factory):
+    move=task()|{'destination_type':'self_relative','reference':None,'displacement_mm':10}
+    h=factory(tasks=[move]);execute=h.runtime._execute
+    def no_move(run,prepared,**kwargs):
+        before=deepcopy(h.case['objects']);result=execute(run,prepared,**kwargs);h.case['objects']=before
+        return result
+    h.runtime._execute=no_move;h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']=='completed',s['sequence']
+    step=s['sequence']['steps'][0]
+    assert step['local_result_check']['destination_error_mm']==pytest.approx(10)
+    assert step.get('retry_count',0)==0
+
+
+def test_stack_uses_original_measured_thickness_after_height_failure(factory):
+    h=factory(tasks=[task('on_top_of',reference='marker')])
+    support=json.loads((ROOT/'tests/data/relative_place_support_demo.json').read_text(encoding='utf-8'))
+    support['objects'][0]['class_name']='marker'
+    support['surface']['support_surfaces']['marker']=support['surface']['support_surfaces'].pop('box')
+    h.case['objects']=support['objects'];h.case['surface']=support['surface']
+    execute=h.runtime._execute;expected=[]
+    def low_once(run,prepared,**kwargs):
+        expected.append(prepared['result_expectation']['expected_top_z_mm'])
+        before=list(h.case['objects'][1]['center_uv'])
+        result=execute(run,prepared,**kwargs)
+        if len(expected)==1:
+            h.case['objects'][1].update(center_uv=before,depth_m=.42)  # Wrong site/height; retry must retain the original thickness.
+        return result
+    h.runtime._execute=low_once;h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']=='completed',s['sequence']
+    step=s['sequence']['steps'][0]
+    assert expected==pytest.approx([40,40],abs=1e-3)
+    assert step['retry_count']==1 and step['result_expectation']['expected_top_z_mm']==pytest.approx(40,abs=1e-3)
+    assert step['local_result_check']['vertical_error_mm']<1e-3
+
+
+def test_swap_retry_keeps_initial_snapshot_and_does_not_repeat_completed_prefix(factory):
+    tasks=[task('near'),task('at_initial',target='pen',reference='eraser'),task('at_initial')]
+    h=factory(tasks=tasks);execute=h.runtime._execute;moves=[]
+    def miss_second_once(run,prepared,**kwargs):
+        step=run['sequence'].snapshot()['step_id'];before=deepcopy(h.case['objects'])
+        moves.append((step,deepcopy(prepared['geometry']['destination_center_robot_xy_mm'])))
+        result=execute(run,prepared,**kwargs)
+        if [i for i,_ in moves].count(2)==1 and step==2:h.case['objects']=before
+        return result
+    h.runtime._execute=miss_second_once;h.create();h.confirm();s=h.wait('completed','failed')
+    assert s['status']=='completed',s['sequence']
+    assert [i for i,_ in moves]==[1,2,2,3]
+    assert moves[1][1]==moves[2][1]
+    assert [step.get('retry_count',0) for step in s['sequence']['steps']]==[0,1,0]
+    assert sum(e['event']=='initial_pose_snapshot' for e in s['sequence']['history'])==1
+
+
+@pytest.mark.parametrize('defect',['missing','invalid_depth'])
+def test_unobservable_relative_result_stops_without_automatic_regrasp(factory,defect):
+    h=factory();execute=h.runtime._execute;scene=h.runtime.scene_factory;done=[]
+    def observed(*args):
+        value=scene(*args)
+        if done and defect=='invalid_depth':value[1].depth_m[:]=0
+        return value
+    def finish(run,prepared,**kwargs):
+        result=execute(run,prepared,**kwargs);done.append(True)
+        if defect=='missing':h.case['objects']=[o for o in h.case['objects'] if o['class_name']!='eraser']
+        return result
+    h.runtime._execute=finish;h.runtime.scene_factory=observed
+    h.create();h.confirm();s=h.wait('failed')
+    assert len(done)==1 and s['sequence']['steps'][0].get('retry_count',0)==0
+    assert s['pending']['status']=='failed' and not s['outcome_verified']
+
+
+def test_cancel_after_retry_is_scheduled_prevents_second_execution(factory):
+    h=factory();execute=h.runtime._execute;advance=h.runtime._advance
+    def no_move(run,prepared,**kwargs):
+        before=deepcopy(h.case['objects']);result=execute(run,prepared,**kwargs);h.case['objects']=before
+        return result
+    def cancel_on_retry(run):
+        seq=run['sequence'];retry=seq._retry_current_step
+        def cancel(*args):
+            retry(*args);run['cancelled']=True;seq.cancel()
+        seq._retry_current_step=cancel
+        return advance(run)
+    h.runtime._execute=no_move;h.runtime._advance=cancel_on_retry
+    h.create();h.confirm();s=h.wait('cancelled')
+    assert sum(e['event']=='object_released_at_place' for e in s['events'])==1
+    assert s['pending']['status']=='cancelled'
