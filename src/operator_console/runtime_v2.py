@@ -1677,7 +1677,8 @@ class ConsoleRuntimeV2:
             ctrl = run.get('controller')
             if ctrl is None or ctrl.gripper_holding_uncertain or not ctrl.at_start:
                 raise ValueError('completion_capture_requires_empty_start')
-            ctrl.sleep(run['config']['robot'].get('start_settle_s',1.5))
+            settle = 0.3 if getattr(ctrl, '_last_arrival_verified', False) else float(run['config']['robot'].get('start_settle_s', 1.5))
+            ctrl.sleep(settle)
             if run['cancelled']:
                 run['completion_capture']['status'] = 'cancelled'
                 run['sequence'].cancel()

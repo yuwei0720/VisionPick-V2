@@ -477,7 +477,8 @@ function maybeAutoConfirm(){
 }
 async function poll(){
   if(runId&&!busy&&!homeRunId&&!tableCapture)try{const expected=generation,id=runId,next=await api('/api/v2/runs/'+id);if(expected===generation&&id===runId&&!busy&&!homeRunId&&!tableCapture)render(next);}catch(e){error(e.message);}
-  clearTimeout(timer);timer=setTimeout(poll,700);
+  const active=['running','executing','capturing'].includes(state?.status)||Boolean(state?.worker_busy);
+  clearTimeout(timer);timer=setTimeout(poll,active?250:700);
 }
 function sceneStartConsent(mode){
   const b=bootState,d=state?.mode===mode?state.devices||b?.devices:b?.devices;
@@ -539,7 +540,7 @@ $('return-home').onclick=()=>guarded(async()=>{
   if(!window.confirm('回 Start 會先張開夾爪。請確認夾爪空手、路徑淨空，是否繼續？'))return;
   syncButtons.activity='home';syncButtons();
   const result=await api('/api/v2/robot/home',{confirm:'RETURN_HOME'});homeRunId=result.run_id;$('status').textContent='Start 復位中';$('status').dataset.state='running';spotlight('running');toast('已送出 Start 復位；可使用緊急停止。');
-  const watch=async()=>{try{const next=await api('/api/v2/runs/'+homeRunId),status=next.run?.status||next.status;if(['completed','failed','blocked','aborted','cancelled','error'].includes(status)){homeRunId=null;syncButtons.activity=null;$('status').textContent=status==='completed'?'Start 復位完成':'Start 復位已停止';$('status').dataset.state=status==='completed'?'idle':'failed';spotlight('idle');syncButtons();toast(status==='completed'?'Start 已復位，請核對現場。':'復位流程已停止，請檢查工程紀錄。');}else setTimeout(watch,700);}catch(e){error(e.message);homeRunId=null;syncButtons.activity=null;$('status').textContent='Start 復位狀態讀取失敗';$('status').dataset.state='failed';syncButtons();}};setTimeout(watch,700);
+  const watch=async()=>{try{const next=await api('/api/v2/runs/'+homeRunId),status=next.run?.status||next.status;if(['completed','failed','blocked','aborted','cancelled','error'].includes(status)){homeRunId=null;syncButtons.activity=null;$('status').textContent=status==='completed'?'Start 復位完成':'Start 復位已停止';$('status').dataset.state=status==='completed'?'idle':'failed';spotlight('idle');syncButtons();toast(status==='completed'?'Start 已復位，請核對現場。':'復位流程已停止，請檢查工程紀錄。');}else setTimeout(watch,250);}catch(e){error(e.message);homeRunId=null;syncButtons.activity=null;$('status').textContent='Start 復位狀態讀取失敗';$('status').dataset.state='failed';syncButtons();}};setTimeout(watch,250);
 });
 const examples={single:'把橡皮擦放到筆的右邊',purpose:'把可以鎖螺絲的工具放到咖啡盒子',top:'把橡皮擦放在電池上面',near:'找一個可以寫字的工具，放到電池附近',multi:'先把橡皮擦放到筆的右邊，再把電池放到咖啡盒子，最後把螺絲起子放在電池附近'};
 for(const b of document.querySelectorAll('[data-example]'))b.onclick=()=>{if(activeTask()||busy)return;$('instruction').value=examples[b.dataset.example];if(b.dataset.example!=='single'){$('semantic-source').value='api';sourceNote();}$('instruction').focus();};

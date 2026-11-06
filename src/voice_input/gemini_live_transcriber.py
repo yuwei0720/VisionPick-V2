@@ -95,7 +95,7 @@ async def _transcribe_microphone_live_async(
                 "Gemini Live Voice 需要 google-genai；請先安裝 requirements.txt"
             ) from exc
         if client is None:
-            client = genai.Client()
+            client = genai.Client(http_options={"api_version": "v1alpha"})
         if types_module is None:
             types_module = types
 
@@ -133,6 +133,7 @@ async def _transcribe_microphone_live_async(
     total_frames = int(round(duration_seconds * sample_rate_hz))
     pcm_buffer = bytearray()
     final_parts: list[str] = []
+    ending = asyncio.Event()
 
     try:
         async with client.aio.live.connect(model=model, config=config) as session:
@@ -141,6 +142,7 @@ async def _transcribe_microphone_live_async(
                     session,
                     final_parts=final_parts,
                     on_interim=on_interim,
+                    ending=ending,
                 )
             )
 
@@ -175,19 +177,22 @@ async def _transcribe_microphone_live_async(
                         )
 
                 # Fixed-duration MVP: explicitly flush the final speech turn.
+                ending.set()
                 await session.send_realtime_input(audio_stream_end=True)
 
-                try:
-                    await asyncio.wait_for(
-                        receiver,
-                        timeout=float(final_timeout_seconds),
-                    )
-                except TimeoutError:
-                    receiver.cancel()
-                    with contextlib.suppress(asyncio.CancelledError):
-                        await receiver
-                    if not final_parts:
-                        raise RuntimeError("Gemini Live Transcribe 等待 finalized transcript 逾時")
+                if not receiver.done():
+                    wait_timeout = 1.0 if final_parts else float(final_timeout_seconds)
+                    try:
+                        await asyncio.wait_for(
+                            receiver,
+                            timeout=wait_timeout,
+                        )
+                    except TimeoutError:
+                        receiver.cancel()
+                        with contextlib.suppress(asyncio.CancelledError):
+                            await receiver
+                        if not final_parts:
+                            raise RuntimeError("Gemini Live Transcribe 等待 finalized transcript 逾時")
             finally:
                 if not receiver.done():
                     receiver.cancel()
@@ -215,6 +220,7 @@ async def _receive_final_transcripts(
     *,
     final_parts: list[str],
     on_interim: Callable[[str], None] | None,
+    ending: asyncio.Event | None = None,
 ) -> None:
     """Collect one Live API turn and stop as soon as it is finalized.
 
@@ -222,11 +228,12 @@ async def _receive_final_transcripts(
     after a transcription turn has completed.  Waiting for the iterator itself
     to end therefore adds the full timeout to an otherwise completed command.
     Treat ``input_transcription`` as finalized text and return once the server
-    also signals ``generation_complete``/``turn_complete``.
+    signals ``generation_complete``/``turn_complete`` or settles after stream end.
     """
 
     saw_final = False
     saw_complete = False
+    interim_pending = False
     async for response in session.receive():
         server_content = getattr(response, "server_content", None)
         if not server_content:
@@ -234,12 +241,15 @@ async def _receive_final_transcripts(
 
         interim = getattr(server_content, "interim_input_transcription", None)
         interim_text = str(getattr(interim, "text", "") or "").strip()
-        if interim_text and on_interim is not None:
-            on_interim(interim_text)
+        if interim_text:
+            interim_pending = True
+            if on_interim is not None:
+                on_interim(interim_text)
 
         final = getattr(server_content, "input_transcription", None)
         final_text = str(getattr(final, "text", "") or "").strip()
         if final_text:
+            interim_pending = False
             # One fixed-duration command maps to one transcription turn.  Avoid
             # duplicate copies if an SDK/service revision repeats the final.
             if not final_parts or final_parts[-1] != final_text:
@@ -251,8 +261,11 @@ async def _receive_final_transcripts(
         )
         turn_complete = bool(getattr(server_content, "turn_complete", False))
         saw_complete = saw_complete or generation_complete or turn_complete
-        if saw_final and saw_complete:
-            return
+        if saw_final:
+            if saw_complete:
+                return
+            if ending is not None and ending.is_set() and not interim_pending and final_text:
+                return
 
 
 def _dedupe_nonempty(values: Iterable[str]) -> list[str]:
@@ -309,12 +322,13 @@ async def _transcribe_pcm_live_async(chunks, *, model, language_codes, custom_vo
         raise ValueError("voice_invalid_final_timeout")
     if client is None:
         from google import genai
-        client = genai.Client()
+        client = genai.Client(http_options={"api_version": "v1alpha"})
     config = {"response_modalities":["TEXT"], "input_audio_transcription":{
         "mode":mode, "language_codes":_dedupe_nonempty(language_codes or []),
         "custom_vocabulary":_dedupe_nonempty(custom_vocabulary or [])}}
     parts, interim = [], ""
     ending = asyncio.Event()
+    turn_completed = False
     def publish():
         committed = " ".join(parts)
         text = " ".join(x for x in (committed, interim) if x)
@@ -324,7 +338,7 @@ async def _transcribe_pcm_live_async(chunks, *, model, language_codes, custom_vo
             on_update(committed, interim)
     async with client.aio.live.connect(model=model, config=config) as session:
         async def receive():
-            nonlocal interim
+            nonlocal interim, turn_completed
             # SDK receive() ends at each turn. Keep receiving subsequent turns
             # until the sender flushes the stream and a final turn is complete.
             while True:
@@ -339,18 +353,22 @@ async def _transcribe_pcm_live_async(chunks, *, model, language_codes, custom_vo
                     if preview is not None:
                         interim = str(getattr(preview, "text", "") or "").strip()
                         publish()
+                        turn_completed = False
                     if final is not None:
                         text = str(getattr(final, "text", "") or "").strip()
                         if text:
                             parts.append(text)
                         interim = ""
                         publish()
-                    if ending.is_set() and parts and (getattr(content,"turn_complete",False)
-                            or getattr(content,"generation_complete",False)):
-                        return
+                    if getattr(content, "turn_complete", False) or getattr(content, "generation_complete", False):
+                        turn_completed = True
+                    if ending.is_set() and parts and not interim:
+                        if turn_completed or (final is not None and getattr(final, "text", "").strip()):
+                            return
                 if not received:
                     return  # Closed transport; never spin on an empty iterator.
         async def send():
+            nonlocal turn_completed
             iterator = iter(chunks)
             sent_audio = False
             while True:
@@ -361,6 +379,7 @@ async def _transcribe_pcm_live_async(chunks, *, model, language_codes, custom_vo
                     raise ValueError("voice_invalid_pcm_chunk")
                 await session.send_realtime_input(audio={"data":chunk,"mime_type":"audio/pcm;rate=16000"})
                 sent_audio = True
+                turn_completed = False
             if not sent_audio:
                 raise ValueError('voice_empty_audio')
             ending.set()
@@ -374,7 +393,18 @@ async def _transcribe_pcm_live_async(chunks, *, model, language_codes, custom_vo
                 if not sender.done():
                     raise ConnectionError("voice_live_stream_closed_early")
             await sender
-            await asyncio.wait_for(receiver,timeout=float(final_timeout_seconds))
+            if not receiver.done():
+                if parts and not interim and turn_completed:
+                    receiver.cancel()
+                    with contextlib.suppress(asyncio.CancelledError, Exception):
+                        await receiver
+                else:
+                    wait_timeout = 1.0 if (parts and not interim) else float(final_timeout_seconds)
+                    try:
+                        await asyncio.wait_for(receiver, timeout=wait_timeout)
+                    except TimeoutError:
+                        if not parts:
+                            raise
         finally:
             if stop_event is not None:
                 stop_event.set()

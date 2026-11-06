@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
-<title>VisionPick｜精密工作台 V2</title><link rel="stylesheet" href="/v2/dashboard.css">
+<title>VisionPick｜V2</title><link rel="stylesheet" href="/v2/dashboard.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Cpath d='M7 8l9 17L25 8' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
 <script defer src="/v2/app.js"></script>
 </head>
@@ -21,7 +21,7 @@
 </defs></svg>
 <main class="dashboard">
 <header class="hud" aria-label="全局狀態與安全操作">
-<div class="brand"><span class="brand-mark">V</span><div><strong>VisionPick</strong><span>精密工作台 <b>V2</b></span></div></div>
+<div class="brand"><span class="brand-mark">V</span><div><strong>VisionPick</strong><span><b>V2</b></span></div></div>
 <div class="system-status"><span id="device-status" class="device-line"><i class="dot"></i>設備尚未連線</span><span id="table-status">桌面基準：讀取中</span></div>
 <div id="status" class="status-pill" role="status" aria-live="polite">等待任務</div>
 <div class="hud-strategies">
@@ -34,7 +34,7 @@
 <div class="workspace">
 <div class="vision-column">
 <section id="vision-panel" class="card vision-panel spotlight-panel" aria-labelledby="scene-title">
-<div class="card-heading"><div><svg><use href="#i-camera"/></svg><h2 id="scene-title">相機視覺</h2><span id="frame-source" class="quiet-tag">等待取像</span></div><div class="canvas-tools"><select id="rotation" aria-label="畫面旋轉"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select><button id="refresh-scene" title="回 Start 後重新取像"><svg><use href="#i-refresh"/></svg>刷新</button></div></div>
+<div class="card-heading"><div><svg><use href="#i-camera"/></svg><h2 id="scene-title">相機</h2><span id="frame-source" class="quiet-tag">等待取像</span></div><div class="canvas-tools"><select id="rotation" aria-label="畫面旋轉"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select><button id="refresh-scene" title="回 Start 後重新取像"><svg><use href="#i-refresh"/></svg>刷新</button></div></div>
 <div id="roi-toolbar" class="roi-toolbar" hidden><span id="roi-guide" role="status">拖曳框選落點；Esc 取消</span><button id="roi-cancel" type="button">取消框選</button></div>
 <div class="vision-canvas"><div class="placement-tools" aria-label="放置預覽顯示"><label><input id="show-placement-preview" type="checkbox" checked>顯示預計放置預覽</label><label><input id="show-placement-envelope" type="checkbox">夾爪安全包絡框</label></div><canvas id="scene" hidden aria-label="物件選取畫面，亦可使用編號按鈕選取" tabindex="0"></canvas><div id="scene-empty" class="empty-vision"><svg><use href="#i-camera"/></svg><strong>讓工作台看見你的物品</strong><p>刷新畫面，或輸入第一個抓放任務。<br>每次執行都會先回 Start，再取得新影格。</p></div><div id="selection-guide" class="glass-pill" hidden>偵測到多個同類物品，請點擊畫面框線選擇</div>
 <div id="canvas-activity-overlay" class="canvas-activity-overlay" role="status" aria-live="polite" aria-atomic="true" hidden>
@@ -53,7 +53,7 @@
 <section id="instruction-panel" class="card instruction-panel spotlight-panel" aria-labelledby="instruction-title">
 <div class="card-heading"><div><svg><use href="#i-spark"/></svg><h2 id="instruction-title">用一句話，安排工作</h2></div><span class="quiet-tag">1–20 步</span></div>
 <form id="instruction-form"><label class="sr-only" for="instruction">完整自然語言指令</label><textarea id="instruction" required maxlength="4000" placeholder="例如：把橡皮擦放到筆的右邊，再把電池放到咖啡盒子">把橡皮擦放到筆的右邊</textarea><div class="instruction-actions"><button type="button" id="voice-input" title="Gemini 即時串流逐字稿"><svg><use href="#i-mic"/></svg>語音輸入</button><span id="source-badge" class="source-badge">離線固定案例</span><button id="parse" class="primary" type="submit"><svg><use href="#i-spark"/></svg>AI 解析任務</button></div></form>
-<div class="example-pills" aria-label="常用展示範例"><button type="button" data-example="single">單步抓放</button><button type="button" data-example="purpose">工具用途</button><button type="button" data-example="top">頂部疊放</button><button type="button" data-example="near">附近搜尋</button><button type="button" data-example="multi">多步指令</button></div><p id="source-note" class="source-note">離線案例使用合成影像與受控回饋，不代表實物抓放成功。</p></section>
+<div class="example-pills" aria-label="常用展示範例"><button type="button" data-example="single">單步任務</button><button type="button" data-example="purpose">工具用途</button><button type="button" data-example="top">頂部疊放</button><button type="button" data-example="near">附近</button><button type="button" data-example="multi">多步任務</button></div><p id="source-note" class="source-note">離線案例使用合成影像與受控回饋，不代表實物抓放成功。</p></section>
 <section id="inspector-panel" class="card inspector-panel spotlight-panel" aria-labelledby="inspector-title"><div class="card-heading"><div><svg><use href="#i-spark"/></svg><h2 id="inspector-title">AI 解析資訊明細</h2></div><span id="plan-count" class="count-tag">等待解析</span></div>
 <div id="plan-empty" class="plan-empty"><span id="inspector-artwork" class="inspector-artwork" aria-hidden="true"><img id="inspector-gif" alt="" hidden><span id="inspector-svg" class="semantic-orbit"><svg><use href="#i-spark"/></svg></span></span><strong id="plan-empty-title">從指令，到每一步的意圖</strong><p id="plan-empty-description">目標物、目的地與參考方向，會在這裡逐步展開，供你核對。</p><div id="plan-skeleton" class="plan-skeleton" aria-hidden="true" hidden><i></i><i></i><i></i></div></div>
 <div id="plan" class="plan-table-wrap" tabindex="0" aria-label="可捲動的多步解析表格" hidden><table class="semantic-table"><thead><tr><th scope="col">步數</th><th scope="col">目標物</th><th scope="col">放置類型</th><th scope="col">參考物／站點</th><th scope="col">參考方向</th><th scope="col">放置 RZ</th></tr></thead><tbody id="task-rows"></tbody></table></div><p id="plan-note" class="inspector-note">先核對 AI 理解，再由工作台定位與執行。</p></section>
