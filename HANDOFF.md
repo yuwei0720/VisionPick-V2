@@ -5,6 +5,7 @@
 ## Current Focus
 
 - 報告最新標準為 `VisionPick_成果報告_1105_第三版.docx`，另存原電腦，不是本倉庫必要執行檔。
+- 先讀 [共用修改與寫作規則](docs/SHARED_WORKING_RULES.md)：程式必要最小改動；Word 自然流暢、便於口述，不主動添加防禦性說明。驗收期間依實況修訂 Word，使用者確認 Word 定稿後才製作 PPT。
 - 使用者已授權保存目前基準、加標籤並上傳既有 yuwei0720/VisionPick-V2 倉庫，取代先前不提交／不上傳限制。仍僅做局部檢查，不自動啟動設備或模型 API。
 - 出發標籤 pre-hardware-20261106；實機分支 hardware/acceptance-01。原電腦保留 main，未驗收修改與結果先上測試分支。
 - 不新增 Agent、重試管理類別／例外框架或 LLM 呼叫，不改 Prompt／任務格式。
