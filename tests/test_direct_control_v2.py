@@ -507,3 +507,14 @@ def test_feedback_exception_cannot_claim_movement_completed(kind):
     with pytest.raises(RobotError,match='controlled feedback error'):
         c.move_pose([100,0,180,-180,0,0]) if kind=='cartesian' else c.move_joint_target([0,0,0,-90,0,-45],label='joint')
     assert len(b.calls)==1 and not any(e=='movement_completed' for e,d in events)
+
+def test_dispatch_failed_controller_error_tagging():
+    c,b,clock,events=controller()
+    b.send_coords=lambda *args: -1
+    b.get_error_information=lambda: 2
+    with pytest.raises(RobotError) as exc_info:
+        c.move_pose([100,0,180,-180,0,0],label='test_dispatch')
+    assert 'controller_error_2' in str(exc_info.value)
+    assert exc_info.value.controller_error == 2
+    evt = next(d for e, d in events if e == 'dispatch_failed')
+    assert evt['controller_error'] == 2

@@ -158,7 +158,7 @@ grasp:
   grasp_z_offset_mm: 1
   target_z_offsets_mm: {}
   min_grasp_z_mm: null
-  tcp_xy_offset_mm: [-6, -6]
+  tcp_xy_offset_mm: [-3, -3]
   rx_deg: -175
   ry_deg: -5
   workspace_mm:
@@ -210,7 +210,7 @@ robot:
     open_state: 0
     close_state: 1
     wait_s: 3
-    open_wait_s: 1.2
+    open_wait_s: 1.8
     close_wait_s: 1.8
 runtime:
   debug_image: runs/v0_debug.png

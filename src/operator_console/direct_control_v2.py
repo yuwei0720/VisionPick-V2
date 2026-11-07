@@ -255,7 +255,8 @@ class DirectRobotControllerV2(OperatorRobotController):
             self._event("motion", "dispatch_failed", status="error", label=label, error_type=type(exc).__name__,
                         send_result=result, target=target, send_results=send_results, dispatch_attempts=dispatch_attempts,
                         controller_error=code)
-            error = RobotError(f"{label}_dispatch_failed")
+            error = RobotError(f"{label}_dispatch_failed:controller_error_{code}" if code not in (None, 0) else f"{label}_dispatch_failed")
+            error.controller_error = code
             error.motion_stage = label
             error.retry_empty_hand = (not self.gripper_holding_uncertain and code == 0
                                       and (label == 'pick_pregrasp' or label.startswith('grasp_descent')))

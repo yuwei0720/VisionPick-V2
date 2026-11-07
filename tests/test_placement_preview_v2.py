@@ -548,7 +548,8 @@ def test_surface_mask_ignores_aabb_corner_but_rejects_inside_rotating_envelope(i
     frame.depth_m[outside]=bad
     args=(env,frame,d,p,np.asarray(c['config']['calibration']['T_robot_from_camera']),0.,2.,c['config']['depth'])
     checked,_=_surface_clear(*args);assert checked==int(mask.sum())
-    inside=tuple(np.rint(uv.mean(axis=0)[::-1]).astype(int));frame.depth_m[inside]=bad
+    cy, cx = int(round(uv.mean(axis=0)[1])), int(round(uv.mean(axis=0)[0]))
+    frame.depth_m[cy-10:cy+10, cx-10:cx+10] = bad
     with pytest.raises(SceneGroundingError,match='destination_surface_not_clear' if intrusion=='obstacle' else 'destination_depth_unavailable'):
         _surface_clear(*args)
 
@@ -563,8 +564,37 @@ def test_named_station_applies_rotated_depth_mask(tmp_path,intrusion):
         prepared=h.runtime._plan_placement(run,t,obs,selected)
         center=prepared['geometry']['destination_center_robot_xy_mm']
         uv=project_robot_points_mm([[*center,0.]],h.cfg,obs.payload['frame'].intrinsics)[0]
-        obs.payload['frame'].depth_m[int(round(uv[1])),int(round(uv[0]))]=.46 if intrusion=='obstacle' else 0.
+        cy, cx = int(round(uv[1])), int(round(uv[0]))
+        obs.payload['frame'].depth_m[cy-10:cy+10, cx-10:cx+10] = .46 if intrusion=='obstacle' else 0.
         with pytest.raises(SceneGroundingError,match='destination_surface_not_clear' if intrusion=='obstacle' else 'destination_depth_unavailable'):
             h.runtime._plan_placement(run,t,obs,selected)
         assert h.backends==[]
     finally:h.close()
+
+
+def test_surface_clear_tolerates_up_to_two_percent_invalid_depth():
+    import cv2
+    c = case(); ds, frame, d, p = synthetic_scene(c)
+    poly = np.array([[-75,-10],[75,-10],[75,10],[-75,10]], dtype=float) + [-110,60]
+    env = clearance_envelope_obb(poly, 10, 5, [0,0])
+    uv = np.asarray(project_robot_points_mm(np.column_stack((env, np.zeros(4))), c['config'], frame.intrinsics))
+    mask = np.zeros(frame.depth_m.shape, np.uint8)
+    cv2.fillConvexPoly(mask, np.rint(uv).astype(np.int32), 1)
+    rows, cols = np.nonzero(mask)
+    total = len(rows)
+    assert total >= 100
+
+    frame.depth_m[:] = 0.5
+    args = (env, frame, d, p, np.asarray(c['config']['calibration']['T_robot_from_camera']), 0.0, 2.0, c['config']['depth'])
+
+    # Exactly 1.5% invalid pixels -> tolerated and surface clear passes
+    count_1p5 = int(total * 0.015)
+    frame.depth_m[rows[:count_1p5], cols[:count_1p5]] = 0.0
+    checked, _ = _surface_clear(*args)
+    assert checked == total - count_1p5
+
+    # More than 2% invalid pixels (e.g. 2.5%) -> rejects with destination_depth_unavailable
+    count_2p5 = int(total * 0.025)
+    frame.depth_m[rows[:count_2p5], cols[:count_2p5]] = 0.0
+    with pytest.raises(SceneGroundingError, match='destination_depth_unavailable'):
+        _surface_clear(*args)

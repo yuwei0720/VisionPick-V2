@@ -1609,8 +1609,11 @@ class ConsoleRuntimeV2:
         }
         run['controller']._program(grasp,place,False)  # Endpoint/parameter validation, no dispatch or solver.
         atomic_json(self._path(run['id'])/f'{observation.frame_id}.geometry.json',geometry)
-        if any(p.get('reason') in {'ambiguous_object_instances','object_not_detected'}
-               for p in run.get('placement_previews',[])):
+        current_preview = next((p for p in run.get('placement_previews', []) if p.get('step_id') == step), None)
+        if (current_preview is None or not current_preview.get('feasible')
+                or current_preview.get('frame_id') != observation.frame_id
+                or any(p.get('reason') in {'ambiguous_object_instances','object_not_detected'}
+                       for p in run.get('placement_previews',[]))):
             self._refresh_placement_previews(run,selected=selected)
         return prepared
 

@@ -298,14 +298,19 @@ def _surface_clear(envelope, frame, deproject, project, transform, z_mm, toleran
         _reject("destination_depth_unavailable", stage="surface_depth", checked_pixels=int(len(rows)),
                 minimum_pixels=depth_cfg.get("min_valid_pixels", 20))
     values = frame.depth_m[rows, columns]
-    # No hole filling: an unobserved part of the proposed landing area is blocked.
-    if (not np.isfinite(values).all() or np.any(values < depth_cfg["min_m"])
-            or np.any(values > depth_cfg["max_m"])):
+    valid = np.isfinite(values) & (values >= depth_cfg["min_m"]) & (values <= depth_cfg["max_m"])
+    invalid_count = int(np.count_nonzero(~valid))
+    max_invalid = int(len(rows) * 0.02)
+    if invalid_count > max_invalid:
         _reject("destination_depth_unavailable", stage="surface_depth", checked_pixels=int(len(rows)),
-                invalid_pixels=int(np.count_nonzero(~np.isfinite(values) | (values < depth_cfg["min_m"]) | (values > depth_cfg["max_m"]))))
+                invalid_pixels=invalid_count, allowed_invalid_pixels=max_invalid)
+    valid_rows, valid_columns = rows[valid], columns[valid]
+    if len(valid_rows) < depth_cfg.get("min_valid_pixels", 20):
+        _reject("destination_depth_unavailable", stage="surface_depth", checked_pixels=int(len(rows)),
+                valid_pixels=int(len(valid_rows)), minimum_pixels=depth_cfg.get("min_valid_pixels", 20))
     points = np.asarray([deproject(float(u), float(v), float(z))
-                         for u, v, z in zip(columns, rows, values)], dtype=float)
-    if points.shape != (len(rows), 3) or not np.isfinite(points).all():
+                         for u, v, z in zip(valid_columns, valid_rows, values[valid])], dtype=float)
+    if points.shape != (len(valid_rows), 3) or not np.isfinite(points).all():
         _reject("destination_depth_unavailable")
     robot_points = (points @ transform[:3, :3].T + transform[:3, 3]) * 1000
     heights = robot_points[:, 2]
@@ -325,7 +330,7 @@ def _surface_clear(envelope, frame, deproject, project, transform, z_mm, toleran
             # Use the original observation's raster footprint. Testing world XY
             # against a floating OBB alone leaves one-pixel raster edge ghosts.
             cv2.fillConvexPoly(original_mask,image_polygon.astype(np.int32),1)
-            own &= original_mask[rows,columns].astype(bool)
+            own &= original_mask[valid_rows,valid_columns].astype(bool)
         else:
             indices = np.flatnonzero(own)
             own[indices] = [cv2.pointPolygonTest(polygon, (float(robot_points[i,0]),float(robot_points[i,1])), False) >= 0 for i in indices]

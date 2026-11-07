@@ -450,7 +450,10 @@ class TaskSequenceV2:
                               and self._retry_perception_once(exc, phase='before'))
                 if not self._cancelled.is_set() and not recapturing:
                     self._status = "failed"
-                    self._error = {"type": type(exc).__name__, "reason": str(exc), "step_id": self._step + 1}
+                    err = {"type": type(exc).__name__, "reason": str(exc), "step_id": self._step + 1}
+                    if hasattr(exc, "controller_error") and exc.controller_error is not None:
+                        err["controller_error"] = exc.controller_error
+                    self._error = err
                     if self._step < len(self._steps):
                         self._steps[self._step].update(status="failed", error=self._error)
                     self._record("step_failed", error=self._error)

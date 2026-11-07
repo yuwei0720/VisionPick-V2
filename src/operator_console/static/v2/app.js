@@ -56,6 +56,12 @@ function translateError(raw, next=state){
   if(/stale_engineering|stale_arrival/.test(reason))return ['設定已被更新，請重新讀取後再儲存。','重新讀取設定','engineering'];
   if(/configuration_changed|stale_plan_version/.test(reason))return ['計畫使用的設定或版本已改變，請重新解析指令。','重新填寫','reset'];
   if(/arrival_timeout/.test(reason))return ['機械臂未在設定時間內通過到位檢查，請檢查現場與回饋。','查看到位紀錄','engineering'];
+  const controllerCode = (reason.match(/controller_error[=_:](\d+)/)?.[1]
+    ?? next?.sequence?.error?.controller_error
+    ?? next?.events?.slice()?.reverse()?.find(e => (e.event === 'dispatch_failed' || e.data?.event === 'dispatch_failed'))?.data?.controller_error);
+  if (/dispatch_failed/.test(reason) && Number(controllerCode) === 2) {
+    return ['機械臂姿態到達運動學極限或逆解無解（代碼 2），請調整目標位置或姿態。', '開啟工程模式', 'engineering'];
+  }
   if(/dispatch_failed|連線失敗|connect|hardware_disabled|real_motion_not_enabled/.test(reason))return ['硬體連線或運動授權未就緒，請核對啟動方式與設備。','開啟工程模式','engineering'];
   if(/ownership_quarantined/.test(reason))return ['設備連線未能確認釋放，請先停止現場操作並檢查工程紀錄。','查看工程紀錄','engineering'];
   if(/scene_snapshot_stale|depth|frame_encode|影像載入失敗/.test(reason))return ['影格已過期或深度資料不足，請重新取像。','重新取像','capture'];
