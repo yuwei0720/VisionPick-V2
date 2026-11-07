@@ -189,9 +189,10 @@ robot:
   pose_verify_orientation_tolerance_deg: 8.0
   pose_verify_stable_polls: 1
   fallback_wait_s: 3
-  vertical_endpoint_wait_s: 4.0    # 垂直終點等待 (抓取下降/抬升/放置下降/退避到位)
-  transfer_wait_s: 3.0             # 跨區等待 (長距離關節或座標跨區移動)
-  intermediate_wait_s: 0.35        # 垂直中間插補點間隔等待
+  vertical_endpoint_wait_s: 1.5    # 垂直終點等待 (抓取下降/抬升/放置下降/退避到位)
+  transfer_wait_s: 3.2             # 跨區等待 (長距離關節或座標跨區移動)
+  intermediate_wait_s: 0.65        # 垂直中間插補點間隔等待
+  allow_unverified_arrival: true   # 實機容錯：當端點通訊多次無效時，以物理等待為準推進後續動作，不卡死中斷
   start_settle_s: 1.5              # 回到 START 後的靜置穩定時間 (秒)，避免太快拍照拍到尚未完全到位的機械臂
   move_to_start_before_pick: true
   start_angles_deg:

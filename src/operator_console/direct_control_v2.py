@@ -285,7 +285,12 @@ class DirectRobotControllerV2(OperatorRobotController):
                     invalid += 1
                     self._event('motion', 'feedback_invalid', label=label, invalid_count=invalid,
                                 effective_poll_interval_s=interval, arrival_verified=False)
-                    if invalid >= 3:
+                    if invalid >= 5:
+                        if self.cfg.get("robot", {}).get("allow_unverified_arrival", False):
+                            self._event('motion', 'arrival_unverified_fallback', label=label,
+                                        invalid_count=invalid, effective_poll_interval_s=interval,
+                                        arrival_verified=False)
+                            break
                         raise RobotError(f'{label}_feedback_unavailable')
                 else:
                     invalid = 0
