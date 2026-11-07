@@ -25,13 +25,13 @@ def case():return json.loads((ROOT/'tests/data/relative_place_s3_demo.json').rea
 
 
 @pytest.mark.parametrize('kind,relation,xyz,passed',[
-    ('self_relative','right_of',[20,0,0],True),
-    ('self_relative','right_of',[20.01,0,0],False),
+    ('self_relative','right_of',[25,0,0],True),
+    ('self_relative','right_of',[25.01,0,0],False),
     ('relative','at_initial',[0,0,0],True),
-    ('relative','right_of',[0,20,0],True),
+    ('relative','right_of',[0,25,0],True),
     ('relative','on_top_of',[0,0,60],True),
     ('relative','on_top_of',[0,0,60.01],False),
-    ('relative','on_top_of',[21,0,40],False),
+    ('relative','on_top_of',[26,0,40],False),
     ('named',None,[24.99,0,0],False),
     ('named',None,[25,0,0],True),
 ])

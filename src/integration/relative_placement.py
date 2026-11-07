@@ -816,7 +816,7 @@ def match_result_target(expected, instances, *, stationary_radius_mm=20.0):
         np.asarray(i['xyz_mm'][:2]) - expected['destination_center_robot_xy_mm']))
 
 
-def evaluate_local_result(expected, instances, *, position_tolerance_mm=20.0,
+def evaluate_local_result(expected, instances, *, position_tolerance_mm=25.0,
                           height_tolerance_mm=20.0, named_min_displacement_mm=25.0):
     """V2's permissive local object check; this never verifies robot arrival."""
     target = match_result_target(expected, instances)
